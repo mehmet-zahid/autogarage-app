@@ -1,13 +1,13 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "build": {
-    "beforeBuildCommand": "npm run generate",
-    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "bun generate",
+    "beforeDevCommand": "bun dev",
     "devPath": "http://localhost:3000",
     "distDir": "../dist"
   },
   "package": {
-    "productName": "tauri-nuxt-app-example",
+    "productName": "otogarage-app",
     "version": "0.1.0"
   },
   "tauri": {
@@ -27,7 +27,7 @@
         "icons/128x128.png",
         "icons/128x128@2x.png",
         "icons/icon.icns",
-        "icons/icon.ico"
+        "icons/logo2.ico"
       ],
       "identifier": "tech.huakun.tauri-nuxt-template",
       "longDescription": "",
@@ -58,7 +58,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "Tauri Nuxt Example App",
+        "title": "AutoGrage App",
         "width": 800
       }
     ]

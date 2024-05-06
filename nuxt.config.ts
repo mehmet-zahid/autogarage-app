@@ -3,6 +3,21 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     ssr: false ,// SSR must be turned off,
     telemetry: false,
+    modules: [
+      '@element-plus/nuxt',
+      '@nuxt/ui',
+      '@vueuse/nuxt',
+      ["@pinia/nuxt", {
+        autoImports: ["defineStore", "acceptHMRUpdate"]
+      }],
+      '@pinia-plugin-persistedstate/nuxt'
+    ],
+    colorMode: {
+      preference: 'dark'
+  },
+  elementPlus: {
+    themes: ['dark']
+  },
     vite: {
         // Better support for Tauri CLI output
         clearScreen: false,
