@@ -1,15 +1,20 @@
 <script setup lang="ts">
-
+import type { Customer} from '~/types/business'
 const router = useRouter();
 const isModalOpen = ref(false)
-const { addCustomer, removeCustomer, getCustomers } = useCustomer();
+const { getAllCustomers } = useDatabase();
+
+const customersData = ref([])
+customersData.value = await getAllCustomers();
+
+console.log(await getAllCustomers());
 
 const commandPaletteRef = ref();
 
 const customers = computed(() =>
-  getCustomers().value.map((customer) => ({
+customersData.value.map((customer: Customer) => ({
     id: customer.id.toString(),
-    label: customer.name,
+    label: customer.fullName,
     to: `/oto/customer/${customer.id}`,
     //href: `/oto/customer/${customer.id}`,
     icon: "i-heroicons-user",
@@ -18,6 +23,10 @@ const customers = computed(() =>
 
 console.log(customers);
 
+
+const refreshData = async () => {
+  customersData.value = await getAllCustomers();
+}
 const actions = [
   // {
   //   id: "new-customer",
@@ -116,7 +125,7 @@ function onSelect(option) {
           </div>
               </template>
 
-              <CustomerCreateForm @close-modal="isModalOpen = false"/>
+              <CustomerCreateForm @close-modal="isModalOpen = false" @refresh-data="refreshData" />
 
               <template #footer>
                 <Placeholder class="h-8" />

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import type { Customer } from '~/types/business'
-const emit = defineEmits(['closeModal', 'refreshData'])
-const { createCustomer } = useDatabase()
+import type { Service } from '~/types/business'
+
+const emit = defineEmits(['closeModal'])
+
+const { createService } = useDatabase()
 // do not use same name with ref
 const form = reactive({
   name: '',
@@ -9,33 +11,42 @@ const form = reactive({
   phone: '',
   address: '',
   companyName: '',
-  description: ''
+  description: '',
+  registeredAt:'',
+  registeredTime:'',
+  isDeleted:''
 })
 
-const customer: Ref<Customer> = computed(() => {
+const customer: Customer = computed(() => {
   return {
-    fullName: form.name,
+    name: form.name,
     email: form.email,
     phone: form.phone,
     address: form.address,
-    companyName: form.companyName,
-    description: form.description
+    companyName:form.companyName,
+    createDate : new Date(),
+    description : form.description,
+    isDeleted : false,
+    description2 : form.description,
+    description3 : form.description,
+    description4 : form.description
   }
 })
 
 
-const onSubmit = async () => {
-  try {
-    const create_res = await createCustomer(customer.value)
-    console.log("createCustomer executed:", create_res)
-    useShowToast('Müşteri başarıyla eklendi', 'success')
+const onSubmit = () => {
+  try{
+    addCustomer(customer.value)
+    useShowToast('Müşteri başarıyla eklendi','success')
     emit("closeModal")
     console.log(new Date());
-    emit("refreshData")
+    
 
-  } catch (e) {
+
+
+  }catch(e){
     console.log(e);
-    useShowToast("Müşteri eklenirken bir hata oluştu", "error")
+    useShowMessage("Bir sorun oluştu")
   }
 
 
@@ -44,7 +55,7 @@ const onSubmit = async () => {
 
 
 <template>
-  <el-form :model="form" label-width="auto" style="max-width: 900px">
+<el-form :model="form" label-width="auto" style="max-width: 900px">
     <el-form-item label="Müşteri Adı">
       <el-input v-model="form.name" />
     </el-form-item>
@@ -63,6 +74,28 @@ const onSubmit = async () => {
     <el-form-item label="Müşteri Adres">
       <el-input v-model="form.address" />
     </el-form-item>
+    
+    <el-form-item label="İşlem Zamanı">
+      <el-col :span="11">
+        <el-date-picker
+          v-model="form.registeredAt"
+          type="date"
+          placeholder="Tarih seçin"
+          style="width: 100%"
+        />
+      </el-col>
+      <el-col :span="2" class="text-center">
+        <span class="text-gray-500">-</span>
+      </el-col>
+      <el-col :span="11">
+        <el-time-picker
+          v-model="form.registeredTime"
+          placeholder="Saat Seçin"
+          style="width: 100%"
+        />
+      </el-col>
+    </el-form-item>
+
 
     <!-- <el-form-item label="Instant delivery">
       <el-switch v-model="form.delivery" />

@@ -45,19 +45,14 @@ onMounted(() => {
   <aside class="h-100">
     <nav class="h-full flex flex-col border-r border-[rgb(45,50,66)] shadow-sm">
       <div class="p4 pb-2 flex justify-between items-center relative">
-        <img
-          src="@/assets/logo1.jpg"
-          class="overflow-hidden transition-all rounded-full ease-in-out duration-500 p-3"
-          :class="{ 'w-32': expanded, 'w-0': !expanded }"
-          alt=""
-        />
-        <!--div class="" :class="{ 'w-32': expanded, 'w-0': !expanded }">
+       
+        <div class="mt-3" :class="{ 'w-32': expanded, 'w-0': !expanded }">
           <img
             src="@/assets/Discovery_DotsIcon.gif"
             alt="Discovery_DotsIcon"
             class="w-[30px] h-[30px] overflow-hidden transition-all rounded-full ease-in-out duration-500"
           />
-        </div-->
+        </div>
 
         <!--Icon
           :class="{
@@ -118,12 +113,12 @@ onMounted(() => {
         <li
           v-for="item in props.sidebarItems"
           :key="item.id"
-          class="relative flex transition-colors group"
+          class="relative flex group"
         >
           <NuxtLink
             :to="item.to"
             :class="{
-              'bg-gradient-to-tr from-orange-200 to-blue-500 hover:text-black':
+              'bg-gradient-to-tr from-green-200 to-green-500 hover:text-black':
                 item.active && expanded,
               'hover:bg-blue-950 text-gray-300': !item.active,
             }"
@@ -167,7 +162,7 @@ onMounted(() => {
         >
           <Icon name="solar:logout-broken" class="w-6 h-6"></Icon>
           <span
-            class="text-sm font-semibold overflow-hidden transition-all"
+            class="text-sm font-semibold overflow-hidden"
             :class="{ 'w-44 ml-2': expanded, 'w-0': !expanded }"
           >
             Logout
@@ -175,7 +170,7 @@ onMounted(() => {
         </div>
       </ul>
 
-      <div class="border-t flex p-3 shadow-lg shadow-indigo-400">
+      <div class="border-t flex p-3 shadow-indigo-400">
         <img
           src="https://ui-avatars.com/api/?backround=c7d2fe&color=3720a3&bold=true"
           class="w-10 h-10 rounded-md"

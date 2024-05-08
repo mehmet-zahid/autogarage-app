@@ -1,45 +1,54 @@
 export interface ServiceType {
-    id: string;
+    id?: string;
     name: string;
+    description?: string;
     price?: number;
-    createDate:Date // oluşturma tarihi
 }
 
 export interface Service {
-    id: string;
-    carId: string;
-    serviceType: ServiceType;
-    date: string;
-    notes?: string;
-    complaint?: string;
-    createDate:Date;
-    isDeleted:boolean;
+    id?: number;
+    customerId?: number;
+    technicianIds?: number[];
+    vehicleIds?: number[];
+    serviceName?: string;
+    description?: string;
+    price?: number;
+    note?: string;
+    createdAt?: Date;
 }
+
 export interface Vehicle {
-    id: number;
-    registeredAt:Date
-    make?: string;//marka
-    model?: string;
+    id?: number;
+    customerId: number;
+    serviceIds?: number[];
+    technicianIds?: number[];
+    registeredAt?:Date
+    make: string;//marka
+    model: string;
     plateNumber: string;
     year?: number;
     color?: string;
     description?: string;
-    mileage: number; //km değeri
-    isDeleted:boolean;
+    mileage?: number;
 }
 export interface Customer {
-    id: string;
-    name: string;
-    registeredAt: Date;
-    registeredTime:Date;
-    createDate : Date;
-    companyName:string;
-    isDeleted?: boolean;
+    id?: number;
+    fullName: string;
+    registeredAt?: Date;
+    companyName?:string;
     email?: string;
     phone?: string;
     address?: string;
-    cars?: Vehicle[];
-    services?: Service[];
+    vehicleIds?: number[];
+    serviceIds?: number[];
     description : string;
+}
+
+export interface Technician {
+    id?: number;
+    fullName: string;
+    email?: string;
+    phone?: string;
+    createdAt?:Date;
 }
 
