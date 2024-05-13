@@ -16,7 +16,8 @@ const MIGRATION_CUSTOMERS_TABLE: Migration = Migration {
       address TEXT,
       vehicleIds TEXT,
       serviceIds TEXT,
-      description TEXT
+      description TEXT,
+      isDeleted INTEGER DEFAULT 0
     )",
     kind: MigrationKind::Up,
 };
@@ -29,17 +30,18 @@ const MIGRATION_SERVICES_TABLE: Migration = Migration {
       customerId INTEGER,
       technicianIds TEXT,
       vehicleIds TEXT,
-      serviceName TEXT,
-      description TEXT,
-      price REAL,
+      serviceOperationIds TEXT,
+      totalCost REAL,
       note TEXT,
-      createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      createdBy TEXT,
+      isDeleted INTEGER DEFAULT 0
     )",
     kind: MigrationKind::Up,
 };
 
 const MIGRATION_VEHICLES_TABLE: Migration = Migration {
-  version: 2,
+  version: 3,
   description: "create_vehicles_table",
   sql: "CREATE TABLE IF NOT EXISTS vehicles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,20 +55,51 @@ const MIGRATION_VEHICLES_TABLE: Migration = Migration {
     year INTEGER,
     color TEXT,
     description TEXT,
-    mileage INTEGER
+    mileage INTEGER,
+    isDeleted INTEGER DEFAULT 0
   )",
   kind: MigrationKind::Up,
 };
 
 const MIGRATION_TECHNICIANS_TABLE: Migration = Migration {
-  version: 2,
+  version: 4,
   description: "create_technicians_table",
   sql: "CREATE TABLE IF NOT EXISTS technicians (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     fullName TEXT NOT NULL,
     email TEXT,
     phone TEXT,
-    createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    isDeleted INTEGER DEFAULT 0
+  )",
+  kind: MigrationKind::Up,
+};
+
+const MIGRATION_SERVICE_TYPES_TABLE: Migration = Migration {
+  version: 5,
+  description: "create_service_types_table",
+  sql: "CREATE TABLE IF NOT EXISTS service_types (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    price REAL,
+    createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    createdBy TEXT,
+    isDeleted INTEGER DEFAULT 0
+  )",
+  kind: MigrationKind::Up,
+};
+
+const MIGRATION_SERVICE_OPERATIONS_TABLE: Migration = Migration {
+  version: 6,
+  description: "create_service_operations_table",
+  sql: "CREATE TABLE IF NOT EXISTS service_operations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    serviceTypeId INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    createdBy TEXT,
+    isDeleted INTEGER DEFAULT 0
   )",
   kind: MigrationKind::Up,
 };
@@ -78,6 +111,8 @@ fn main() {
         MIGRATION_SERVICES_TABLE,
         MIGRATION_VEHICLES_TABLE,
         MIGRATION_TECHNICIANS_TABLE,
+        MIGRATION_SERVICE_TYPES_TABLE,
+        MIGRATION_SERVICE_OPERATIONS_TABLE,
     ];
   tauri::Builder::default()
     .plugin(tauri_plugin_sql::Builder::default()

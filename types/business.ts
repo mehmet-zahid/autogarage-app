@@ -1,8 +1,20 @@
 export interface ServiceType {
-    id?: string;
+    id?: number;
     name: string;
     description?: string;
     price?: number;
+    createdAt?: Date;
+    createdBy?: string;
+    isDeleted?: number;
+}
+
+export interface ServiceOperation {
+    id?: number;
+    serviceTypeId: number;
+    note?: string;
+    createdAt?: Date;
+    createdBy?: string;
+    isDeleted?: number;
 }
 
 export interface Service {
@@ -10,11 +22,12 @@ export interface Service {
     customerId?: number;
     technicianIds?: number[];
     vehicleIds?: number[];
-    serviceName?: string;
-    description?: string;
-    price?: number;
+    serviceOperationIds?: number[];
+    totalCost?: number;
     note?: string;
     createdAt?: Date;
+    createdBy?: string;
+    isDeleted?: number;
 }
 
 export interface Vehicle {
@@ -30,6 +43,7 @@ export interface Vehicle {
     color?: string;
     description?: string;
     mileage?: number;
+    isDeleted?: number;
 }
 export interface Customer {
     id?: number;
@@ -42,6 +56,7 @@ export interface Customer {
     vehicleIds?: number[];
     serviceIds?: number[];
     description : string;
+    isDeleted?: number;
 }
 
 export interface Technician {
@@ -50,5 +65,6 @@ export interface Technician {
     email?: string;
     phone?: string;
     createdAt?:Date;
+    isDeleted?: number;
 }
 

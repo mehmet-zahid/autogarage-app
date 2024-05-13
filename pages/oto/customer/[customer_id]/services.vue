@@ -2,7 +2,11 @@
 
 const { getAllServices } = useDatabase();
 
-const services = getAllServices();
+// fetch initial data
+const services = ref([]);
+services.value = await getAllServices();
+
+
 // Columns
 const columns = [{
   key: 'id',
@@ -118,15 +122,8 @@ const addNewService = () => {
 <template>
   <div>
     <div class="flex flex-col justify-between items-center">
-      <ServiceItemsBox />
-      <UCard class="w-full" :ui="{
-        base: '',
-        ring: '',
-        divide: 'divide-y divide-gray-200 dark:divide-gray-700',
-        header: { padding: 'px-4 py-5' },
-        body: { padding: '', base: 'divide-y divide-gray-200 dark:divide-gray-700' },
-        footer: { padding: 'p-4' }
-      }">
+      <ServiceItemsCard />
+      <UCard class="w-full">
         <template #header>
           <div class="flex space-x-10">
             <h2 class="font-semibold text-xl text-gray-900 dark:text-white leading-tight">
@@ -234,8 +231,6 @@ const addNewService = () => {
           </div>
         </template>
       </UCard>
-
-      <pre>{{ services }}</pre>
     </div>
   </div>
 </template>
