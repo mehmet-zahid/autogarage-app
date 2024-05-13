@@ -32,7 +32,7 @@ const breadcrumbLinks = ref([
         </div>
 
         <div class="flex gap-2 h-screen p-2">
-            <ServiceItemsCard class="flex-1" :customer_name="customer?.fullName" :customer_reg_date="customer?.registeredAt" />
+            <ServiceItemsCard class="flex-1" :customer_name="customer?.fullName"/>
             
         </div>
     </div>

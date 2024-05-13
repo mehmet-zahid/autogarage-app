@@ -2,7 +2,6 @@
 
 const props = defineProps<{
   customer_name: string
-  customer_reg_date: string
 }>()
 
 const dropdownItems = [
