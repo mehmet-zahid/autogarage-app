@@ -5,16 +5,6 @@ const props = defineProps<{
   customer_reg_date: string
 }>()
 
-const dateObject = new Date(props.customer_reg_date)
-// Get the year, month, and day
-const year = dateObject.getFullYear();
-// getMonth() returns a zero-based index, so we add 1 to get the actual month number
-const month = dateObject.getMonth() + 1;
-const day = dateObject.getDate();
-
-// Format the date as "YYYY-MM-DD"
-const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-
 const dropdownItems = [
   [{
     label: 'Action x',
