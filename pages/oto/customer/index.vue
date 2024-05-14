@@ -125,7 +125,7 @@ function onSelect(option) {
           </div>
               </template>
 
-              <CustomerCreateForm @close-modal="isModalOpen = false" @refresh-data="refreshData" />
+              <VehicleCreateForm @close-modal="isModalOpen = false" @refresh-data="refreshData" />
 
               <template #footer>
                 <Placeholder class="h-8" />
@@ -145,6 +145,6 @@ function onSelect(option) {
       <template #footer> </template>
     </UCard>
 
-    <CustomerTable />
+    <VehicleTable />
   </div>
 </template>

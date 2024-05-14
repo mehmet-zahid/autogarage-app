@@ -39,7 +39,7 @@ const sidebarItems = [
         title: 'Raporlama',
         icon: 'solar:document-add-bold',
         active: false,
-        to: '/oto/reporting'
+        to: '/oto/report'
     },
     {
         id: 7,

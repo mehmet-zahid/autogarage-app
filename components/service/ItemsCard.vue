@@ -51,7 +51,7 @@ const dropdownItems = [
           <span class="text-sm font-light justify-center">Servis Oluştur</span>
         </div>
         <div class="flex flex-col gap-2">
-          <p class="text-lg text-gray-300 border border-solid border-[#00214f] rounded-lg p-2"> {{ props.customer_name.toLocaleUpperCase() }}</p>
+          <p class="text-lg text-gray-300 border border-solid border-[#00214f] rounded-lg p-2"> {{ props.customer_name }}</p>
           
         </div>
         
@@ -62,6 +62,7 @@ const dropdownItems = [
     </template>
 
     <div class="h-96">
+      <CustomerTable/>
       </div>
 
     <template #footer>

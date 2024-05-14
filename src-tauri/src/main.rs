@@ -14,8 +14,6 @@ const MIGRATION_CUSTOMERS_TABLE: Migration = Migration {
       email TEXT,
       phone TEXT,
       address TEXT,
-      vehicleIds TEXT,
-      serviceIds TEXT,
       description TEXT,
       isDeleted INTEGER DEFAULT 0
     )",
@@ -46,8 +44,6 @@ const MIGRATION_VEHICLES_TABLE: Migration = Migration {
   sql: "CREATE TABLE IF NOT EXISTS vehicles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     customerId INTEGER NOT NULL,
-    serviceIds TEXT,
-    technicianIds TEXT,
     registeredAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     make TEXT,
     model TEXT,
@@ -90,19 +86,33 @@ const MIGRATION_SERVICE_TYPES_TABLE: Migration = Migration {
   kind: MigrationKind::Up,
 };
 
-const MIGRATION_SERVICE_OPERATIONS_TABLE: Migration = Migration {
-  version: 6,
-  description: "create_service_operations_table",
-  sql: "CREATE TABLE IF NOT EXISTS service_operations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    serviceTypeId INTEGER NOT NULL,
-    name TEXT NOT NULL,
-    createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    createdBy TEXT,
-    isDeleted INTEGER DEFAULT 0
-  )",
-  kind: MigrationKind::Up,
-};
+// const MIGRATION_SERVICE_OPERATIONS_TABLE: Migration = Migration {
+//   version: 6,
+//   description: "create_service_operations_table",
+//   sql: "CREATE TABLE IF NOT EXISTS service_operations (
+//     id INTEGER PRIMARY KEY AUTOINCREMENT,
+//     serviceTypeId INTEGER NOT NULL,
+//     name TEXT NOT NULL,
+//     createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+//     createdBy TEXT,
+//     isDeleted INTEGER DEFAULT 0
+//   )",
+//   kind: MigrationKind::Up,
+// };
+
+const MIGRATION_SERVICE_LOGIN_TABLE: Migration = Migration {
+     version: 6,
+     description: "create_service_operations_table",
+     sql: "CREATE TABLE IF NOT EXISTS userlogin(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT,
+      password TEXT
+     )",
+     kind: MigrationKind::Up,
+    };
+     
+
+
 
 fn main() {
   let migrations: Vec<Migration> = vec![
@@ -112,7 +122,8 @@ fn main() {
         MIGRATION_VEHICLES_TABLE,
         MIGRATION_TECHNICIANS_TABLE,
         MIGRATION_SERVICE_TYPES_TABLE,
-        MIGRATION_SERVICE_OPERATIONS_TABLE,
+        MIGRATION_SERVICE_LOGIN_TABLE
+        //MIGRATION_SERVICE_OPERATIONS_TABLE,
     ];
   tauri::Builder::default()
     .plugin(tauri_plugin_sql::Builder::default()

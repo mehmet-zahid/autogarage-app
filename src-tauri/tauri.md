@@ -35,6 +35,12 @@
                             sql: include_str!("../migrations/5.sql"),
                             kind: MigrationKind::Up,
                         },
+                        Migration {
+                            version: 6,
+                            description: "added location on inventory login table",
+                            sql: include_str!("../migrations/6.sql"),
+                            kind: MigrationKind::Up,
+                        },
                     ],
                 )
                 .build(),

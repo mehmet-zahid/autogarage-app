@@ -1,28 +1,33 @@
-export interface ServiceType {
-    id?: number;
-    name: string;
-    description?: string;
-    price?: number;
-    createdAt?: Date;
-    createdBy?: string;
-    isDeleted?: number;
+// export interface ServiceType {
+//     id?: number;
+//     name: string;
+//     description?: string;
+//     price?: number;
+//     createdAt?: Date;
+//     createdBy?: string;
+//     isDeleted?: number;
+// }
+
+// export interface ServiceOperation {
+//     id?: number;
+//     serviceTypeId: number;
+//     note?: string;
+//     createdAt?: Date;
+//     createdBy?: string;
+//     isDeleted?: number;
+// }
+
+export interface UserLogin{ // tek kullanıcı full yetki
+    username:string;
+    password:string;
 }
 
-export interface ServiceOperation {
-    id?: number;
-    serviceTypeId: number;
-    note?: string;
-    createdAt?: Date;
-    createdBy?: string;
-    isDeleted?: number;
-}
 
 export interface Service {
     id?: number;
     customerId?: number;
     technicianIds?: number[];
     vehicleIds?: number[];
-    serviceOperationIds?: number[];
     totalCost?: number;
     note?: string;
     createdAt?: Date;
@@ -33,8 +38,6 @@ export interface Service {
 export interface Vehicle {
     id?: number;
     customerId: number;
-    serviceIds?: number[];
-    technicianIds?: number[];
     registeredAt?:Date
     make: string;//marka
     model: string;
@@ -53,8 +56,6 @@ export interface Customer {
     email?: string;
     phone?: string;
     address?: string;
-    vehicleIds?: number[];
-    serviceIds?: number[];
     description : string;
     isDeleted?: number;
 }

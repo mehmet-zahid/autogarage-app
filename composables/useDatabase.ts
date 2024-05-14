@@ -3,7 +3,8 @@ import type { Customer, Vehicle, Technician, Service } from '~/types/business';
 
 const db = await Database.load('sqlite:auto-repair-shop.db');
 
-export const useDatabase = () => {
+export const useDatabase = () => { // 4 export 
+
 
   const dbName = 'auto-repair-shop.db';
   const tables = {

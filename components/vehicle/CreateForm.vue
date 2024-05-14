@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type {Vehicle } from '~/types'
-const emit = defineEmits(['closeModal'])
-const { addVehicle} = useVehicle()
+const emit = defineEmits(['closeModal', 'refreshData'])
+const { createVehicle} = useDatabase()
 // do not use same name with ref
 const form = reactive({
   plate: '',
@@ -22,12 +22,12 @@ const vehicle: Vehicle = computed(() => {
 
 const onSubmit = () => {
   try{
-    addVehicle(vehicle.value)
-    useShowMessage('Araç başarıyla eklendi','success')
+    createVehicle(vehicle.value)
+    useShowToast('Araç başarıyla eklendi','success')
     emit("closeModal")
   }catch(e){
     console.log(e);
-    useShowMessage("Bir sorun oluştu")
+    useShowToast("Bir sorun oluştu")
   }
 
 
@@ -52,7 +52,7 @@ const onSubmit = () => {
     <el-form-item label="Araç Kilometresi">
       <el-input v-model="form.mileage" />
     </el-form-item>
-    
+<!--     
     <el-form-item label="Activity time">
       <el-col :span="11">
         <el-date-picker
@@ -72,11 +72,11 @@ const onSubmit = () => {
           style="width: 100%"
         />
       </el-col>
-    </el-form-item>
-    <el-form-item label="Instant delivery">
+    </el-form-item> -->
+    <!-- <el-form-item label="Instant delivery">
       <el-switch v-model="form.delivery" />
-    </el-form-item>
-    <el-form-item label="Activity type">
+    </el-form-item> -->
+    <!-- <el-form-item label="Activity type">
       <el-checkbox-group v-model="form.type">
         <el-checkbox value="Online activities" name="type">
           Online activities
@@ -90,14 +90,14 @@ const onSubmit = () => {
         <el-checkbox value="Simple brand exposure" name="type">
           Simple brand exposure
         </el-checkbox>
-      </el-checkbox-group>
-    </el-form-item>
-    <el-form-item label="Resources">
+      </el-checkbox-group> 
+    </el-form-item>-->
+    <!-- <el-form-item label="Resources">
       <el-radio-group v-model="form.resource">
         <el-radio value="Sponsor">Sponsor</el-radio>
         <el-radio value="Venue">Venue</el-radio>
       </el-radio-group>
-    </el-form-item>
+    </el-form-item> -->
     <el-form-item label="Activity form">
       <el-input v-model="form.desc" type="textarea" />
     </el-form-item>
