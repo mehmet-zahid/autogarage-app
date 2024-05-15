@@ -43,7 +43,6 @@ const MIGRATION_VEHICLES_TABLE: Migration = Migration {
   description: "create_vehicles_table",
   sql: "CREATE TABLE IF NOT EXISTS vehicles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    customerId INTEGER NOT NULL,
     registeredAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     make TEXT,
     model TEXT,
