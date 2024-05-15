@@ -67,7 +67,7 @@ const MIGRATION_TECHNICIANS_TABLE: Migration = Migration {
     phone TEXT,
     createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     isDeleted INTEGER DEFAULT 0
-  )",
+  )", 
   kind: MigrationKind::Up,
 };
 

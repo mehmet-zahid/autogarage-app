@@ -29,23 +29,24 @@ export interface Service {
     technicianIds?: number[];
     vehicleIds?: number[];
     totalCost?: number;
+    //processType tamir yada bakım
     note?: string;
     createdAt?: Date;
     createdBy?: string;
+    createDate?:Date;
     isDeleted?: number;
 }
 
 export interface Vehicle {
     id?: number;
-    customerId: number;
-    registeredAt?:Date
-    make: string;//marka
-    model: string;
     plateNumber: string;
+    mileage?: number;
+    registeredAt?:Date
+    make?: string;//marka
+    model: string;
     year?: number;
     color?: string;
     description?: string;
-    mileage?: number;
     isDeleted?: number;
 }
 export interface Customer {
@@ -62,7 +63,7 @@ export interface Customer {
 
 export interface Technician {
     id?: number;
-    fullName: string;
+    fullName?: string;
     email?: string;
     phone?: string;
     createdAt?:Date;

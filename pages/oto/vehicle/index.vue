@@ -10,23 +10,20 @@ vehiclesData.value = await getAllVehicles();
 console.log(await getAllVehicles());
 
 const commandPaletteRef = ref();
-
+const refreshData = async () => {
+  vehiclesData.value = await getAllVehicles();
+}
 const vehicles = computed(() =>
 vehiclesData.value.map((vehicle: Vehicle) => ({
     id: vehicle.id.toString(),
-    label: vehicle.fullName,
+    label: vehicle.plateNumber,
     to: `/oto/vehicle/${vehicle.id}`,
     //href: `/oto/vehicle/${vehicle.id}`,
     icon: "i-heroicons-user",
   }))
 );
 
-console.log(vehicles);
 
-
-const refreshData = async () => {
-  vehiclesData.value = await getAllVehicles();
-}
 const actions = [
   // {
   //   id: "new-vehicle",

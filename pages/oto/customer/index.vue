@@ -21,9 +21,6 @@ customersData.value.map((customer: Customer) => ({
   }))
 );
 
-console.log(customers);
-
-
 const refreshData = async () => {
   customersData.value = await getAllCustomers();
 }
@@ -125,7 +122,7 @@ function onSelect(option) {
           </div>
               </template>
 
-              <VehicleCreateForm @close-modal="isModalOpen = false" @refresh-data="refreshData" />
+              <CustomerCreateForm @close-modal="isModalOpen = false" @refresh-data="refreshData" />
 
               <template #footer>
                 <Placeholder class="h-8" />

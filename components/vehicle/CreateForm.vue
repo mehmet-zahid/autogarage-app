@@ -1,33 +1,39 @@
 <script setup lang="ts">
-import type {Vehicle } from '~/types'
+import type {Vehicle } from '~/types/business'
 const emit = defineEmits(['closeModal', 'refreshData'])
 const { createVehicle} = useDatabase()
 // do not use same name with ref
 const form = reactive({
   plate: '',
   model: '',
+  make:'',
   year: '',
+  color:'',
   description: '',
   mileage:'',
 })
 
-const vehicle: Vehicle = computed(() => {
+const vehicle: Ref<Vehicle> = computed(() => {
   return {
-    name: form.plate,
-    email: form.model,
-    phone: form.year,
-    address: form.address,
+    plateNumber: form.plate,
+    make: form.model,
+    model: form.year,
+    year:form.year,
+    color:form.color,
+    description: form.description,
+    mileage:form.mileage
   }
 })
 
-const onSubmit = () => {
+const onSubmit = async () => {
   try{
-    createVehicle(vehicle.value)
+    const create_veh = await createVehicle(vehicle.value)
     useShowToast('Araç başarıyla eklendi','success')
     emit("closeModal")
+    emit("refreshData")
+
   }catch(e){
-    console.log(e);
-    useShowToast("Bir sorun oluştu")
+    useShowToast("Araç eklenirken bir sorun oluştu", "error")
   }
 
 
@@ -40,18 +46,19 @@ const onSubmit = () => {
     <el-form-item label="Araç Plakası">
       <el-input v-model="form.plate" />
     </el-form-item>
-    <el-form-item label="Araç Modeli">
+    <el-form-item label="Araç Kilometresi">
+      <el-input v-model="form.mileage" />
+    </el-form-item>
+    <el-form-item label="Araç Marka Modeli">
       <el-input v-model="form.model" />
     </el-form-item>
     <el-form-item label="Araç Üretim Yılı">
       <el-input v-model="form.year" />
     </el-form-item>
-    <el-form-item label="Araç Açıklaması">
-      <el-input v-model="form.description" />
+    <el-form-item label="Araç Rengi">
+      <el-input v-model="form.color" />
     </el-form-item>
-    <el-form-item label="Araç Kilometresi">
-      <el-input v-model="form.mileage" />
-    </el-form-item>
+   
 <!--     
     <el-form-item label="Activity time">
       <el-col :span="11">
@@ -99,11 +106,11 @@ const onSubmit = () => {
       </el-radio-group>
     </el-form-item> -->
     <el-form-item label="Activity form">
-      <el-input v-model="form.desc" type="textarea" />
+      <el-input v-model="form.description" type="textarea" />
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" @click="onSubmit">Create </el-button>
-      <el-button @click="$emit('closeModal')">Cancel</el-button>
+      <el-button type="primary" @click="onSubmit">Kaydet </el-button>
+      <el-button @click="$emit('closeModal')">Vazgeç</el-button>
     </el-form-item>
   </el-form>
 

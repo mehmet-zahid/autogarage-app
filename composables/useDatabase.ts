@@ -17,32 +17,32 @@ export const useDatabase = () => { // 4 export
 
   // Create
   async function createService(service: Service): Promise<Service> {
-    const query = `INSERT INTO ${tables.services} (customerId, technicianIds, vehicleIds, serviceName, description, price, note)
+    const query = `INSERT INTO ${tables.services} (customerId, technicianIds, vehicleIds, totalCost, note,createdAt,createdBy)
                    VALUES ($1, $2, $3, $4, $5, $6, $7)`;
     const params = [
       service.customerId,
-      JSON.stringify(service.technicianIds || []), // Convert technicianIds array to JSON string
-      JSON.stringify(service.vehicleIds || []), // Convert vehicleIds array to JSON string
-      service.serviceName,
-      service.description,
-      service.price,
+      service.technicianIds,
+      service.vehicleIds,
+      service.totalCost,
       service.note,
+      service.createdAt,
+      service.createdBy,
+
     ];
     
     const result = await db.execute(query, params);
     return {
       id: result.lastInsertId,
       ...service,
+      createDate: new Date(),
+
     };
   }
 
   async function createVehicle(vehicle: Vehicle): Promise<Vehicle> {
-    const query = `INSERT INTO ${tables.vehicles} (customerId, serviceIds, technicianIds, make, model, plateNumber, year, color, description, mileage)
-                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+    const query = `INSERT INTO ${tables.vehicles} (make, model, plateNumber, year, color, description, mileage)
+                   VALUES ($1, $2, $3, $4, $5, $6, $7)`;
     const params = [
-      vehicle.customerId,
-      JSON.stringify(vehicle.serviceIds || []), // Convert serviceIds array to JSON string
-      JSON.stringify(vehicle.technicianIds || []), // Convert technicianIds array to JSON string
       vehicle.make,
       vehicle.model,
       vehicle.plateNumber,
@@ -56,6 +56,7 @@ export const useDatabase = () => { // 4 export
     return {
       id: result.lastInsertId,
       ...vehicle,
+      registeredAt: new Date(),
     };
 
   }
@@ -95,12 +96,10 @@ export const useDatabase = () => { // 4 export
   }
 
   async function getAllServices(): Promise<Service[]> {
-    const query = `SELECT * FROM ${tables.services}`;
+    const query = `SELECT * FROM ${tables.services} WHERE isDeleted=0`;
     const results = await db.select(query);
 
     results.forEach((service) => {
-      service.technicianIds = JSON.parse(service.technicianIds || '[]'); // Parse technicianIds JSON string back to array
-      service.vehicleIds = JSON.parse(service.vehicleIds || '[]'); // Parse vehicleIds JSON string back to array
       service.createdAt = new Date(service.createdAt);
     });
 
@@ -108,25 +107,19 @@ export const useDatabase = () => { // 4 export
   }
 
   async function getAllVehicles(): Promise<Vehicle[]> {
-    const query = `SELECT * FROM ${tables.vehicles}`;
+    const query = `SELECT * FROM ${tables.vehicles} WHERE isDeleted = 0`;
     const results = await db.select(query);
-
     results.forEach((vehicle) => {
-      vehicle.serviceIds = JSON.parse(vehicle.serviceIds || '[]'); // Parse serviceIds JSON string back to array
-      vehicle.technicianIds = JSON.parse(vehicle.technicianIds || '[]'); // Parse technicianIds JSON string back to array
       vehicle.registeredAt = new Date(vehicle.registeredAt);
     });
-
     return results;
   }
 
   async function getAllCustomers(): Promise<Customer[]> {
-    const query = `SELECT * FROM ${tables.customers}`;
+    const query = `SELECT * FROM ${tables.customers} WHERE isDeleted = 0 `;
     const results = await db.select(query);
 
     results.forEach((customer) => {
-      customer.vehicleIds = JSON.parse(customer.vehicleIds || '[]'); // Parse vehicleIds JSON string back to array
-      customer.serviceIds = JSON.parse(customer.serviceIds || '[]'); // Parse serviceIds JSON string back to array
       customer.registeredAt = new Date(customer.registeredAt);
     });
 

@@ -27,14 +27,11 @@ const customer: Ref<Customer> = computed(() => {
 const onSubmit = async () => {
   try {
     const create_res = await createCustomer(customer.value)
-    console.log("createCustomer executed:", create_res)
     useShowToast('Müşteri başarıyla eklendi', 'success')
     emit("closeModal")
-    console.log(new Date());
     emit("refreshData")
 
   } catch (e) {
-    console.log(e);
     useShowToast("Müşteri eklenirken bir hata oluştu", "error")
   }
 
