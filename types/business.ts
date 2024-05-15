@@ -26,8 +26,8 @@ export interface UserLogin{ // tek kullanıcı full yetki
 export interface Service {
     id?: number;
     customerId?: number;
-    technicianIds?: number[];
-    vehicleIds?: number[];
+    technicianIds?: number;
+    vehicleIds?: number;
     totalCost?: number;
     //processType tamir yada bakım
     note?: string;

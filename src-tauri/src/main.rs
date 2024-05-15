@@ -26,8 +26,8 @@ const MIGRATION_SERVICES_TABLE: Migration = Migration {
     sql: "CREATE TABLE IF NOT EXISTS services (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       customerId INTEGER,
-      technicianIds TEXT,
-      vehicleIds TEXT,
+      technicianIds INTEGER,
+      vehicleIds INTEGER,
       serviceOperationIds TEXT,
       totalCost REAL,
       note TEXT,
