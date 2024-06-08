@@ -1,50 +1,122 @@
 import  Database  from '@tauri-apps/plugin-sql';
-import type { Customer, Vehicle, Technician, Service } from '~/types/business';
+import type { Customer, Vehicle, Technician, Service, UserLogin } from '~/types/business';
 
 const db = await Database.load('sqlite:auto-repair-shop.db');
 
-export const useDatabase = () => { // 4 export 
-
+export const useDatabase = () => { 
 
   const dbName = 'auto-repair-shop.db';
   const tables = {
-    services: 'services',
-    vehicles: 'vehicles',
-    customers: 'customers',
-    technicians: 'technicians',
+    users: 'AuthUser',
+    services: 'Service',
+    service_types: 'ServiceType',
+    service_operations: 'ServiceOperation',
+    vehicles: 'Vehicle',
+    customers: 'Customer',
+    technicians: 'Technician',
   };
-  // CRUD operations
+
+  // User Db Functions
+  async function getUsers(): Promise<UserLogin[]> {
+    const query = `SELECT * FROM ${tables.users}`;
+    const results = await db.select(query);
+    return results as UserLogin[];
+    
+  }
+
+  // ----------------------- Service DB Funtions -----------------------
+
+  // Get All Services
+  async function getServices(): Promise<Service[]> {
+    const query = `SELECT * FROM ${tables.services} WHERE isDeleted = 0`;
+    const services = await db.select(query);
+    // remove isDeleted from the result
+    services.forEach((service: Service) => delete service.isDeleted);
+    return services as Service[];
+  }
 
   // Create
   async function createService(service: Service): Promise<Service> {
-    const query = `INSERT INTO ${tables.services} (customerId, technicianIds, vehicleIds, totalCost, note,createdAt,createdBy)
-                   VALUES ($1, $2, $3, $4, $5, $6, $7)`;
+    const query = `
+      INSERT INTO ${tables.services} (vehicle_id, technician_id, total_cost, note, createdBy)
+      VALUES ($1, $2, $3, $4, $5)
+    `;
     const params = [
-      service.customerId,
-      service.technicianIds,
-      service.vehicleIds,
-      service.totalCost,
+      service.vehicle_id,
+      service.technician_id,
+      service.total_cost,
       service.note,
-      service.createdAt,
       service.createdBy,
-
     ];
     
     const result = await db.execute(query, params);
     return {
       id: result.lastInsertId,
       ...service,
-      createDate: new Date(),
-
     };
   }
 
-  async function createVehicle(vehicle: Vehicle): Promise<Vehicle> {
-    const query = `INSERT INTO ${tables.vehicles} (make, model, plateNumber, year, color, description, mileage)
-                   VALUES ($1, $2, $3, $4, $5, $6, $7)`;
+  // Update Service
+  async function updateService(service: Service): Promise<number> {
+    const query = `
+      UPDATE ${tables.services}
+      SET vehicle_id = $1, technician_id = $2, total_cost = $3, note = $4, completedAt = $5,
+      WHERE id = $6
+    `;
     const params = [
+      service.vehicle_id,
+      service.technician_id,
+      service.total_cost,
+      service.note,
+      service.completedAt,
+      service.id
+    ];
+    const res = await db.execute(query, params);
+
+    if (res.rowsAffected === 0) {
+      throw new Error(`Could not update Service with id ${service.id}`);
+    }
+    return res.rowsAffected;
+  }
+  
+  // Delete Service
+  async function deleteService(id: number): Promise<number> {
+    const query = `UPDATE ${tables.services} SET isDeleted = 1 WHERE id = $1`;
+    const params = [id];
+    
+    const res = await db.execute(query, params);
+    if (res.rowsAffected === 0) {
+      throw new Error(`Could not delete Service with id ${id}`);
+    }
+    return res.rowsAffected;
+  }
+
+  // ----------------- Vehicle DB Functions -----------------
+
+  // Get All Vehicles
+  async function getVehicles(): Promise<Vehicle[]> {
+    const query = `SELECT * FROM ${tables.vehicles} WHERE isDeleted = 0`;
+    const vehicles = await db.select(query);
+    vehicles.forEach((vehicle: Vehicle) => delete vehicle.isDeleted);
+    return vehicles as Vehicle[];
+  }
+
+  async function getVehiclesByCustomerId(customer_id: number): Promise<Vehicle[]> {
+    const query = `SELECT * FROM ${tables.vehicles} WHERE customer_id = $1 AND isDeleted = 0`;
+    const vehicles = await db.select(query, [customer_id]);
+    return vehicles as Vehicle[];
+  }
+
+  // Create Vehicle
+  async function createVehicle(vehicle: Vehicle): Promise<Vehicle> {
+    const query = `
+      INSERT INTO ${tables.vehicles} (customer_id, make, model, vin, plateNumber, year, color, description, mileage)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
+    const params = [
+      vehicle.customer_id,
       vehicle.make,
       vehicle.model,
+      vehicle.vin,
       vehicle.plateNumber,
       vehicle.year,
       vehicle.color,
@@ -56,16 +128,70 @@ export const useDatabase = () => { // 4 export
     return {
       id: result.lastInsertId,
       ...vehicle,
-      registeredAt: new Date(),
     };
 
   }
 
+  // Update Vehicle
+  async function updateVehicle(vehicle: Vehicle): Promise<number> {
+    const query = `
+      UPDATE ${tables.vehicles}
+      SET customer_id = $1, make = $2, model = $3, vin = $4, plateNumber = $5, year = $6, color = $7, description = $8, mileage = $9
+      WHERE id = $10
+    `;
+    const params = [
+      vehicle.customer_id,
+      vehicle.make,
+      vehicle.model,
+      vehicle.vin,
+      vehicle.plateNumber,
+      vehicle.year,
+      vehicle.color,
+      vehicle.description,
+      vehicle.mileage,
+      vehicle.id
+    ];
+    const res = await db.execute(query, params);
+    if (res.rowsAffected === 0) {
+      throw new Error(`Could not update Vehicle with id ${vehicle.id}`);
+    }
+    return res.rowsAffected;
+  }
+
+  // Delete Vehicle
+  async function deleteVehicle(id: number): Promise<number> {
+    const query = `UPDATE ${tables.vehicles} SET isDeleted = 1 WHERE id = $1`;
+    const params = [id];
+    
+    const res = await db.execute(query, params);
+    if (res.rowsAffected === 0) {
+      throw new Error(`Could not delete Vehicle with id ${id}`);
+    }
+    return res.rowsAffected;
+  }
+
+  // ----------------- Customer DB Functions -----------------
+
+  // Get All Customers
+  async function getCustomers(): Promise<Customer[]> {
+    const query = `SELECT * FROM ${tables.customers} WHERE isDeleted = 0`;
+    const customers = await db.select(query);
+    customers.forEach((customer: Customer) => delete customer.isDeleted);
+    return customers as Customer[];
+  }
+
+  async function getCustomerById(id: number): Promise<Customer> {
+    const query = `SELECT * FROM ${tables.customers} WHERE id = $1 AND isDeleted = 0`;
+    const customer = await db.select(query, [id]);
+    customer.forEach((customer: Customer) => delete customer.isDeleted);
+    return customer[0] as Customer;
+  }
+
   async function createCustomer(customer: Customer): Promise<Customer> {
-    const query = `INSERT INTO ${tables.customers} (fullName, companyName, email, phone, address, description)
+    const query = `INSERT INTO ${tables.customers} (name, companyName, email, phone, address, description)
                    VALUES ($1, $2, $3, $4, $5, $6)`;
     const params = [
-      customer.fullName,
+      customer.name,
       customer.companyName,
       customer.email,
       customer.phone,
@@ -77,289 +203,164 @@ export const useDatabase = () => { // 4 export
     return {
       id: result.lastInsertId,
       ...customer,
-      registeredAt: new Date(),
     };
   }
 
+  // Update Customer
+  async function updateCustomer(customer: Customer): Promise<number> {
+    console.log(customer);
+    const query = `
+      UPDATE ${tables.customers}
+      SET name = $1, companyName = $2, email = $3, phone = $4, address = $5, description = $6
+      WHERE id = $7
+    `;
+    const params = [
+      customer.name,
+      customer.companyName,
+      customer.email,
+      customer.phone,
+      customer.address,
+      customer.description,
+      customer.id
+    ];
+    const res = await db.execute(query, params);
+    if (res.rowsAffected === 0) {
+      throw new Error(`Could not update Customer with id ${customer.id}`);
+    }
+    return res.rowsAffected;
+  }
+
+  // Delete Customer
+  async function deleteCustomer(id: number): Promise<number> {
+    const query = `UPDATE ${tables.customers} SET isDeleted = 1 WHERE id = $1`;
+    const params = [id];
+    
+    const res = await db.execute(query, params);
+    if (res.rowsAffected === 0) {
+      throw new Error(`Could not delete Customer with id ${id}`);
+    }
+    return res.rowsAffected;
+  }
+
+  // ----------------- Technician DB Functions -----------------
+
+  // Get All Technicians
+  async function getTechnicians(): Promise<Technician[]> {
+    const query = `SELECT * FROM ${tables.technicians} WHERE isDeleted = 0`;
+    const technicians = await db.select(query);
+    technicians.forEach((technician: Technician) => delete technician.isDeleted);
+    return technicians as Technician[];
+  }
+
+  // Create Technician
   async function createTechnician(technician: Technician): Promise<Technician> {
-    const query = `INSERT INTO ${tables.technicians} (fullName, email, phone)
-                   VALUES ($1, $2, $3)`;
-    const params = [technician.fullName, technician.email, technician.phone];
+    const query = `
+      INSERT INTO ${tables.technicians} (name, email, phone, specialty)
+      VALUES ($1, $2, $3, $4)
+    `;
+    const params = [
+      technician.name,
+      technician.email,
+      technician.phone,
+      technician.specialty,
+    ];
     
     const result = await db.execute(query, params);
     return {
       id: result.lastInsertId,
       ...technician,
-      createdAt: new Date(),
     };
-
   }
 
-  async function getAllServices(): Promise<Service[]> {
-    const query = `SELECT * FROM ${tables.services} WHERE isDeleted=0`;
-    const results = await db.select(query);
-
-    results.forEach((service) => {
-      service.createdAt = new Date(service.createdAt);
-    });
-
-    return results;
+  // Update Technician
+  async function updateTechnician(technician: Technician): Promise<number> {
+    const query = `
+      UPDATE ${tables.technicians}
+      SET name = $1, email = $2, phone = $3, specialty = $4
+      WHERE id = $5
+    `;
+    const params = [
+      technician.name,
+      technician.email,
+      technician.phone,
+      technician.specialty,
+      technician.id
+    ];
+    const res = await db.execute(query, params);
+    if (res.rowsAffected === 0) {
+      throw new Error(`Could not update Technician with id ${technician.id}`);
+    }
+    return res.rowsAffected;
   }
 
-  async function getAllVehicles(): Promise<Vehicle[]> {
-    const query = `SELECT * FROM ${tables.vehicles} WHERE isDeleted = 0`;
-    const results = await db.select(query);
-    results.forEach((vehicle) => {
-      vehicle.registeredAt = new Date(vehicle.registeredAt);
-    });
-    return results;
-  }
-
-  async function getAllCustomers(): Promise<Customer[]> {
-    const query = `SELECT * FROM ${tables.customers} WHERE isDeleted = 0 `;
-    const results = await db.select(query);
-
-    results.forEach((customer) => {
-      customer.registeredAt = new Date(customer.registeredAt);
-    });
-
-    return results;
-  }
-
-  async function getAllTechnicians(): Promise<Technician[]> {
-    const query = `SELECT * FROM ${tables.technicians}`;
-    const results = await db.select(query);
-
-    results.forEach((technician) => {
-      technician.createdAt = new Date(technician.createdAt);
-    });
-
-    return results;
-  }
-
-
-
-  // Read
-  async function getServiceById(id: number): Promise<Service | null> {
-    const query = `SELECT * FROM ${tables.services} WHERE id = $1`;
-    const params = [id];
-    const results = await db.select(query, params);
-
-    results.forEach((service) => {
-      service.technicianIds = JSON.parse(service.technicianIds || '[]'); // Parse technicianIds JSON string back to array
-      service.vehicleIds = JSON.parse(service.vehicleIds || '[]'); // Parse vehicleIds JSON string back to array
-      service.createdAt = new Date(service.createdAt);
-    });
-
-    return results.length > 0 ? results[0] : null;
-  }
-
-  async function getVehicleById(id: number): Promise<Vehicle | null> {
-    const query = `SELECT * FROM ${tables.vehicles} WHERE id = $1`;
-    const params = [id];
-    const results = await db.select(query, params);
-
-    results.forEach((vehicle) => {
-      vehicle.serviceIds = JSON.parse(vehicle.serviceIds || '[]'); // Parse serviceIds JSON string back to array
-      vehicle.technicianIds = JSON.parse(vehicle.technicianIds || '[]'); // Parse technicianIds JSON string back to array
-      vehicle.registeredAt = new Date(vehicle.registeredAt);
-    });
-
-    return results.length > 0 ? results[0] : null;
-  }
-
-  async function getCustomerById(id: number): Promise<Customer | null> {
-    const query = `SELECT * FROM ${tables.customers} WHERE id = $1`;
+  // Delete Technician
+  async function deleteTechnician(id: number): Promise<number> {
+    const query = `UPDATE ${tables.technicians} SET isDeleted = 1 WHERE id = $1`;
     const params = [id];
     
-    const results = await db.select(query, params);
-
-    results.forEach((customer) => {
-      customer.vehicleIds = JSON.parse(customer.vehicleIds || '[]'); // Parse vehicleIds JSON string back to array
-      customer.serviceIds = JSON.parse(customer.serviceIds || '[]'); // Parse serviceIds JSON string back to array
-      customer.registeredAt = new Date(customer.registeredAt);
-    });
-
-    return results.length > 0 ? results[0] : null;
+    const res = await db.execute(query, params);
+    if (res.rowsAffected === 0) {
+      throw new Error(`Could not delete Technician with id ${id}`);
+    }
+    return res.rowsAffected;
   }
 
-  async function getTechnicianById(id: number): Promise<Technician | null> {
-    const query = `SELECT * FROM ${tables.technicians} WHERE id = $1`;
-    const params = [id];
-    const results = await db.select(query, params);
+  // ----------------- Special Queries with Joins -----------------
 
-    results.forEach((technician) => {
-      technician.createdAt = new Date(technician.createdAt);
-    });
-
-    return results.length > 0 ? results[0] : null;
+  // Get Services with Related Vehicle and Technician Info
+  async function getServiceDetails(): Promise<any[]> {
+    const query = `
+      SELECT 
+        s.id, s.total_cost, s.note, s.createdAt, s.completedAt,
+        v.make, v.model, v.year, v.license_plate,
+        t.name as technician_name
+      FROM ${tables.services} s
+      JOIN ${tables.vehicles} v ON s.vehicle_id = v.id
+      JOIN ${tables.technicians} t ON s.technician_id = t.id
+      WHERE s.isDeleted = 0
+    `;
+    const serviceDetails = await db.select(query);
+    return serviceDetails as any[];
   }
 
-  // Additional functions (examples)
-  async function getServicesByCustomerId(customerId: number): Promise<Service[]> {
-      const query = `SELECT * FROM ${tables.services} WHERE customerId = $1`;
-      const params = [customerId];
-     
-      const results = await db.select(query, params);
+  // Get Vehicle Service History
+  async function getVehicleServiceHistory(vehicle_id: number): Promise<any[]> {
+    const query = `
+      SELECT 
+        s.id, s.total_cost, s.note, s.createdAt, s.completedAt,
+        t.name as technician_name
+      FROM ${tables.services} s
+      JOIN ${tables.technicians} t ON s.technician_id = t.id
+      WHERE s.vehicle_id = ? AND s.isDeleted = 0
+    `;
+    const serviceHistory = await db.select(query, [vehicle_id]);
+    return serviceHistory as any[];
+  }
 
-      return results.map((service) => ({
-        ...service,
-        technicianIds: JSON.parse(service.technicianIds || '[]'),
-        vehicleIds: JSON.parse(service.vehicleIds || '[]'),
-        createdAt: new Date(service.createdAt),
-      }));
-    }
-  
-    // Update (example)
-    async function updateService(service: Service): Promise<void> {
-      const query = `UPDATE ${tables.services}
-                     SET customerId = $1,
-                         technicianIds = $2,
-                         vehicleIds = $3,
-                         serviceName = $4,
-                         description = $5,
-                         price = $6,
-                         note = $7
-                     WHERE id = $8`;
-      const params = [
-        service.customerId,
-        JSON.stringify(service.technicianIds || []),
-        JSON.stringify(service.vehicleIds || []),
-        service.serviceName,
-        service.description,
-        service.price,
-        service.note,
-        service.id,
-      ];
-      await db.execute(query, params);
-    }
 
-    // Update customer (example)
-    async function updateCustomer(customer: Customer): Promise<void> {
-      const query = `UPDATE ${tables.customers}
-                     SET fullName = $1,
-                         companyName = $2,
-                         email = $3,
-                         phone = $4,
-                         address = $5,
-                         description = $6
-                     WHERE id = $7`;
-      const params = [
-        customer.fullName,
-        customer.companyName,
-        customer.email,
-        customer.phone,
-        customer.address,
-        customer.description,
-        customer.id,
-      ];
-      await db.execute(query, params);
-    }
 
-    // Update vehicle (example)
-    async function updateVehicle(vehicle: Vehicle): Promise<void> {
-      const query = `UPDATE ${tables.vehicles}
-                     SET customerId = $1,
-                         serviceIds = $2,
-                         technicianIds = $3,
-                         make = $4,
-                         model = $5,
-                         plateNumber = $6,
-                         year = $7,
-                         color = $8,
-                         description = $9,
-                         mileage = $10
-                     WHERE id = $11`;
-      const params = [
-        vehicle.customerId,
-        JSON.stringify(vehicle.serviceIds || []),
-        JSON.stringify(vehicle.technicianIds || []),
-        vehicle.make,
-        vehicle.model,
-        vehicle.plateNumber,
-        vehicle.year,
-        vehicle.color,
-        vehicle.description,
-        vehicle.mileage,
-        vehicle.id,
-      ];
-      await db.execute(query, params);
-    }
-
-    // Update technician (example)
-    async function updateTechnician(technician: Technician): Promise<void> {
-      const query = `UPDATE ${tables.technicians}
-                     SET fullName = $1,
-                         email = $2,
-                         phone = $3
-                     WHERE id = $4`;
-      const params = [technician.fullName, technician.email, technician.phone, technician.id];
-      await db.execute(query, params);
-    }
-  
-    // Delete (example)
-    async function deleteService(id: number): Promise<void> {
-      const query = `DELETE FROM ${tables.services} WHERE id = $1`;
-      const params = [id];
-      await db.execute(query, params);
-    }
-
-    // Delete customer (example)
-    async function deleteCustomer(id: number): Promise<void> {
-      const query = `DELETE FROM ${tables.customers} WHERE id = $1`;
-      const params = [id];
-      await db.execute(query, params);
-    }
-
-    // Delete vehicle (example)
-    async function deleteVehicle(id: number): Promise<void> {
-      const query = `DELETE FROM ${tables.vehicles} WHERE id = $1`;
-      const params = [id];
-      await db.execute(query, params);
-    }
-
-    // Delete technician (example)
-
-    async function deleteTechnician(id: number): Promise<void> {
-      const query = `DELETE FROM ${tables.technicians} WHERE id = $1`;
-      const params = [id];
-      await db.execute(query, params);
-    }
-  
-    // You can add similar update and delete functions for other tables (vehicles, customers, technicians)
   
     return {
-      // Get All functions
-      getAllServices,
-      getAllVehicles,
-      getAllCustomers,
-      getAllTechnicians,
-  
-      // Create functions
-      createService,
-      createVehicle,
-      createCustomer,
-      createTechnician,
-  
-      // Read functions
-      getServiceById,
-      getVehicleById,
-      getCustomerById,
-      getTechnicianById,
-  
-      // Additional functions (examples)
-      getServicesByCustomerId,
-  
-      // Update functions (example)
-      updateService,
-      updateCustomer,
-      updateVehicle,
-      updateTechnician,
-  
-      // Delete functions (example)
-      deleteService,
-      deleteCustomer,
-      deleteVehicle,
-      deleteTechnician,
+    getUsers,
+    getServices,
+    createService,
+    updateService,
+    deleteService,
+    getVehicles,
+    getVehiclesByCustomerId,
+    createVehicle,
+    updateVehicle,
+    deleteVehicle,
+    getCustomers,
+    getCustomerById,
+    createCustomer,
+    updateCustomer,
+    deleteCustomer,
+    getTechnicians,
+    createTechnician,
+    updateTechnician,
+    deleteTechnician,
+    getServiceDetails,
+    getVehicleServiceHistory,
     };
 };

@@ -5,7 +5,7 @@ export default defineNuxtRouteMiddleware((to, from)=> {
     //const cookie_auth = useCookie('user').value ? useCookie('user').value.isLoggedIn : false
     //console.log("COOKIE:isLoggedIn", cookie_auth)
     try {
-
+        console.log(userStore.isLoggedIn)
         if (userStore.isLoggedIn) {
             if (to.path === '/'){
                 return navigateTo('/oto/dashboard')

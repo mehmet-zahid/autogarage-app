@@ -1,23 +1,24 @@
-// export interface ServiceType {
-//     id?: number;
-//     name: string;
-//     description?: string;
-//     price?: number;
-//     createdAt?: Date;
-//     createdBy?: string;
-//     isDeleted?: number;
-// }
+export interface ServiceType {
+     id?: number;
+     name: string;
+     description?: string;
+     price?: number;
+     createdAt?: Date;
+     createdBy?: string;
+     isDeleted?: number;
+ }
 
-// export interface ServiceOperation {
-//     id?: number;
-//     serviceTypeId: number;
-//     note?: string;
-//     createdAt?: Date;
-//     createdBy?: string;
-//     isDeleted?: number;
-// }
+export interface ServiceOperation {
+     id?: number;
+     service_id: number;
+     service_type_id: number;
+     quantity: number;
+     note?: string;
+     createdAt?: Date;
+     isDeleted?: number;
+ }
 
-export interface UserLogin{ // tek kullanıcı full yetki
+export interface UserLogin{ 
     username:string;
     password:string;
 }
@@ -25,33 +26,33 @@ export interface UserLogin{ // tek kullanıcı full yetki
 
 export interface Service {
     id?: number;
-    customerId?: number;
-    technicianIds?: number;
-    vehicleIds?: number;
-    totalCost?: number;
-    //processType tamir yada bakım
+    vehicle_id?: number;
+    technician_id?: number;
+    total_cost?: number;
     note?: string;
     createdAt?: Date;
     createdBy?: string;
-    createDate?:Date;
+    completedAt?:Date;
     isDeleted?: number;
 }
 
 export interface Vehicle {
     id?: number;
-    plateNumber: string;
-    mileage?: number;
-    registeredAt?:Date
-    make?: string;//marka
+    customer_id?: number;
+    registeredAt?:Date;
+    make?: string;
     model: string;
+    vin?: string;
     year?: number;
     color?: string;
     description?: string;
+    plateNumber: string;
+    mileage?: number;
     isDeleted?: number;
 }
 export interface Customer {
     id?: number;
-    fullName: string;
+    name: string;
     registeredAt?: Date;
     companyName?:string;
     email?: string;
@@ -63,10 +64,11 @@ export interface Customer {
 
 export interface Technician {
     id?: number;
-    fullName?: string;
+    name?: string;
     email?: string;
     phone?: string;
-    createdAt?:Date;
+    specialty?: string;
+    registeredAt?:Date;
     isDeleted?: number;
 }
 

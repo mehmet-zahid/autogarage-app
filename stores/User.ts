@@ -2,7 +2,7 @@ export const useUser = defineStore('user', {
     state: () => {
         return {
             isLoggedIn: false,
-            user: null,
+            username: null as string | null,
 
         };
     },
@@ -13,14 +13,11 @@ export const useUser = defineStore('user', {
     actions: {
         logout() {
             this.isLoggedIn = false;
-            this.user = null;
+            this.username = null;
             console.log("isLoggedin", this.isLoggedIn)
 
             useRouter().push({ path: '/login' })
-        },
-        getAuthorizationHeader(): string | null {
-            return this.user ? `Bearer ${this.user.token}` : null;
-        },
+        }
     },
 });
 

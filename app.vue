@@ -1,6 +1,7 @@
 <script setup>
 
 // 141414 - dark color
+
 </script>
 
 <template>
@@ -10,6 +11,7 @@
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <UModals />
   </div>
 </template>
 

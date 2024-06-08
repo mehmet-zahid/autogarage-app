@@ -1,116 +1,131 @@
 <script setup lang="ts">
-import type {Vehicle } from '~/types/business'
+
+import type { Vehicle } from '~/types/business'
+import type { ComponentSize, FormInstance, FormRules } from 'element-plus'
+
+
+const loading = ref(false);
+
+const props = defineProps<{
+    customer_id: number
+}>()
 const emit = defineEmits(['closeModal', 'refreshData'])
-const { createVehicle} = useDatabase()
-// do not use same name with ref
-const form = reactive({
-  plate: '',
-  model: '',
-  make:'',
-  year: '',
-  color:'',
-  description: '',
-  mileage:'',
-})
 
-const vehicle: Ref<Vehicle> = computed(() => {
-  return {
-    plateNumber: form.plate,
-    make: form.model,
-    model: form.year,
-    year:form.year,
-    color:form.color,
-    description: form.description,
-    mileage:form.mileage
-  }
-})
+const { createVehicle } = useDatabase()
 
-const onSubmit = async () => {
-  try{
-    const create_veh = await createVehicle(vehicle.value)
-    useShowToast('Araç başarıyla eklendi','success')
-    emit("closeModal")
-    emit("refreshData")
-
-  }catch(e){
-    useShowToast("Araç eklenirken bir sorun oluştu", "error")
-  }
-
-
+interface RuleForm {
+    make: string;
+    model: string;
+    vin: string;
+    year: number;
+    color: string;
+    description: string;
+    plateNumber: string;
+    mileage: number;
 }
+
+const formSize = ref<ComponentSize>('default')
+const ruleFormRef = ref<FormInstance>()
+const ruleForm = reactive<RuleForm>({
+  customer_id: props.customer_id,
+    make: '',
+    model: '',
+    vin: '',
+    year: 0,
+    color: '',
+    description: '',
+    plateNumber: '',
+    mileage: 0
+
+})
+
+const rules = reactive<FormRules<RuleForm>>({
+    make: [{ required: true, message: 'Marka adı gereklidir', trigger: 'blur' }],
+    model: [{ required: true, message: 'Model adı gereklidir', trigger: 'blur' }],
+    vin: [{ required: true, message: 'Şasi numarası gereklidir', trigger: 'blur' }],
+    year: [{ required: true, message: 'Yıl bilgisi gereklidir', trigger: 'blur' }],
+    color: [{ required: true, message: 'Renk bilgisi gereklidir', trigger: 'blur' }],
+    plateNumber: [{ required: true, message: 'Plaka numarası gereklidir', trigger: 'blur' }],
+    mileage: [{ required: true, message: 'Kilometre bilgisi gereklidir', trigger: 'blur' }],
+    description: [{ required: false, message: 'Açıklama gereklidir', trigger: 'blur' }]
+})
+
+
+
+
+const submitForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      loading.value = true;
+      try {
+
+        const create_res = await createVehicle(ruleForm)
+        console.log("Create Response", create_res)
+        useShowToast('Araç başarıyla eklendi', 'success')
+        emit("closeModal")
+        emit("refreshData")
+
+      } catch (e) {
+        if (e.includes('UNIQUE constraint failed: Vehicle.plateNumber')) {
+          useShowToast('Bu plaka numarası zaten mevcut. Lütfen farklı bir plaka numarası girin.', 'error');
+        } else {
+          useShowToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+        }
+        
+        console.log("Error", e)
+      }
+      loading.value = false;
+
+    } else {
+      console.log('error submit!', fields)
+      useShowToast('Lütfen formu doğru doldurunuz', 'error')
+    }
+  })
+}
+
+const resetForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+}
+
 </script>
 
 
 <template>
-<el-form :model="form" label-width="auto" style="max-width: 600px">
-    <el-form-item label="Araç Plakası">
-      <el-input v-model="form.plate" />
+  <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules" label-width="auto" style="max-width: 600px"
+    :size="formSize" status-icon>
+    <el-form-item label="Marka" prop="make">
+      <el-input v-model="ruleForm.make" placeholder="Marka" clearable></el-input>
     </el-form-item>
-    <el-form-item label="Araç Kilometresi">
-      <el-input v-model="form.mileage" />
+    <el-form-item label="Model" prop="model">
+      <el-input v-model="ruleForm.model" placeholder="Model" clearable></el-input>
     </el-form-item>
-    <el-form-item label="Araç Marka Modeli">
-      <el-input v-model="form.model" />
+    <el-form-item label="Şasi Numarası" prop="vin">
+      <el-input v-model="ruleForm.vin" placeholder="Şasi Numarası" clearable></el-input>
     </el-form-item>
-    <el-form-item label="Araç Üretim Yılı">
-      <el-input v-model="form.year" />
+    <el-form-item label="Yıl" prop="year">
+      <el-input v-model="ruleForm.year" placeholder="Yıl" clearable></el-input>
     </el-form-item>
-    <el-form-item label="Araç Rengi">
-      <el-input v-model="form.color" />
+    <el-form-item label="Renk" prop="color">
+      <el-input v-model="ruleForm.color" placeholder="Renk" clearable></el-input>
     </el-form-item>
-   
-<!--     
-    <el-form-item label="Activity time">
-      <el-col :span="11">
-        <el-date-picker
-          v-model="form.date1"
-          type="date"
-          placeholder="Pick a date"
-          style="width: 100%"
-        />
-      </el-col>
-      <el-col :span="2" class="text-center">
-        <span class="text-gray-500">-</span>
-      </el-col>
-      <el-col :span="11">
-        <el-time-picker
-          v-model="form.date2"
-          placeholder="Pick a time"
-          style="width: 100%"
-        />
-      </el-col>
-    </el-form-item> -->
-    <!-- <el-form-item label="Instant delivery">
-      <el-switch v-model="form.delivery" />
-    </el-form-item> -->
-    <!-- <el-form-item label="Activity type">
-      <el-checkbox-group v-model="form.type">
-        <el-checkbox value="Online activities" name="type">
-          Online activities
-        </el-checkbox>
-        <el-checkbox value="Promotion activities" name="type">
-          Promotion activities
-        </el-checkbox>
-        <el-checkbox value="Offline activities" name="type">
-          Offline activities
-        </el-checkbox>
-        <el-checkbox value="Simple brand exposure" name="type">
-          Simple brand exposure
-        </el-checkbox>
-      </el-checkbox-group> 
-    </el-form-item>-->
-    <!-- <el-form-item label="Resources">
-      <el-radio-group v-model="form.resource">
-        <el-radio value="Sponsor">Sponsor</el-radio>
-        <el-radio value="Venue">Venue</el-radio>
-      </el-radio-group>
-    </el-form-item> -->
-    <el-form-item label="Activity form">
-      <el-input v-model="form.description" type="textarea" />
+    <el-form-item label="Plaka Numarası" prop="plateNumber">
+      <el-input v-model="ruleForm.plateNumber" placeholder="Plaka Numarası" clearable></el-input>
     </el-form-item>
+    <el-form-item label="Kilometre" prop="mileage">
+      <el-input v-model="ruleForm.mileage" placeholder="Kilometre" clearable></el-input>
+    </el-form-item>
+    <el-form-item label="Açıklama" prop="description">
+      <el-input v-model="ruleForm.description" placeholder="Açıklama" clearable></el-input>
+    </el-form-item>
+
     <el-form-item>
-      <el-button type="primary" @click="onSubmit">Kaydet </el-button>
-      <el-button @click="$emit('closeModal')">Vazgeç</el-button>
+      <el-button type="primary" @click="submitForm(ruleFormRef)">
+        Oluştur
+      </el-button>
+      <el-button @click="resetForm(ruleFormRef)">Reset</el-button>
+      <el-button @click="$emit('closeModal')">İptal et</el-button>
     </el-form-item>
   </el-form>
 
