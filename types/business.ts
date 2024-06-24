@@ -27,7 +27,6 @@ export interface UserLogin{
 export interface Service {
     id?: number;
     vehicle_id?: number;
-    technician_id?: number;
     total_cost?: number;
     note?: string;
     createdAt?: Date;

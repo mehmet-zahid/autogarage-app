@@ -30,7 +30,7 @@ const MIGRATION_VEHICLE_TABLE: Migration = Migration {
     registeredAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     make TEXT,
     model TEXT,
-    vin TEXT UNIQUE,
+    vin TEXT,
     year INTEGER,
     plateNumber TEXT UNIQUE,
     color TEXT,
@@ -48,15 +48,13 @@ const MIGRATION_SERVICE_TABLE: Migration = Migration {
     sql: "CREATE TABLE IF NOT EXISTS Service (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       vehicle_id INTEGER,
-      technician_id INTEGER,
       total_cost REAL,
       note TEXT,
       createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       createdBy TEXT,
       completedAt TEXT,
       isDeleted INTEGER DEFAULT 0,
-      FOREIGN KEY (vehicle_id) REFERENCES Vehicle(id),
-      FOREIGN KEY (technician_id) REFERENCES Technician(id)
+      FOREIGN KEY (vehicle_id) REFERENCES Vehicle(id)
     )",
     kind: MigrationKind::Up,
 };

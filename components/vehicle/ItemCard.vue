@@ -6,7 +6,7 @@ const props = defineProps < {
     vehicle: Vehicle;
 } > ();
 
-const emit = defineEmits(['refreshData']);
+const emit = defineEmits(['refreshData', 'click']);
 const { deleteVehicle } = useDatabase();
 const modal = useModal()
 
@@ -44,7 +44,7 @@ const getDropdownItems = (vehicle: Vehicle) => [
 
 <template>
     <div class="p-2 relative h-32 rounded-lg shadow-md flex gap-4 items-center cursor-pointer border 
-    border-solid border-gray-800 transition-all hover:border-green-400">
+    border-solid border-gray-800 transition-all hover:border-green-400" @click="() => $router.push(`/oto/vehicle/${props.vehicle.id}`)">
         <div class="flex flex-col gap-1">
             <div class="text-lg font-semibold">{{ props.vehicle.make }} - {{ props.vehicle.model }}</div>
             <div class="text-sm">{{ props.vehicle.plateNumber }}</div>

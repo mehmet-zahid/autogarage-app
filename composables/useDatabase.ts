@@ -35,15 +35,21 @@ export const useDatabase = () => {
     return services as Service[];
   }
 
+  async function getServicesByVehicleId(vehicle_id: number): Promise<Service[]> {
+    const query = `SELECT * FROM ${tables.services} WHERE vehicle_id = $1 AND isDeleted = 0`;
+    const services = await db.select(query, [vehicle_id]);
+    services.forEach((service: Service) => delete service.isDeleted);
+    return services as Service[];
+  }
+
   // Create
   async function createService(service: Service): Promise<Service> {
     const query = `
-      INSERT INTO ${tables.services} (vehicle_id, technician_id, total_cost, note, createdBy)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO ${tables.services} (vehicle_id, total_cost, note, createdBy)
+      VALUES ($1, $2, $3, $4)
     `;
     const params = [
       service.vehicle_id,
-      service.technician_id,
       service.total_cost,
       service.note,
       service.createdBy,
@@ -60,15 +66,15 @@ export const useDatabase = () => {
   async function updateService(service: Service): Promise<number> {
     const query = `
       UPDATE ${tables.services}
-      SET vehicle_id = $1, technician_id = $2, total_cost = $3, note = $4, completedAt = $5,
+      SET vehicle_id = $1, total_cost = $2, note = $3, completedAt = $4, isDeleted = $5
       WHERE id = $6
     `;
     const params = [
       service.vehicle_id,
-      service.technician_id,
       service.total_cost,
       service.note,
       service.completedAt,
+      service.isDeleted,
       service.id
     ];
     const res = await db.execute(query, params);
@@ -99,6 +105,13 @@ export const useDatabase = () => {
     const vehicles = await db.select(query);
     vehicles.forEach((vehicle: Vehicle) => delete vehicle.isDeleted);
     return vehicles as Vehicle[];
+  }
+
+  async function getVehicleById(id: number): Promise<Vehicle> {
+    const query = `SELECT * FROM ${tables.vehicles} WHERE id = $1 AND isDeleted = 0`;
+    const vehicle = await db.select(query, [id]);
+    vehicle.forEach((vehicle: Vehicle) => delete vehicle.isDeleted);
+    return vehicle[0] as Vehicle;
   }
 
   async function getVehiclesByCustomerId(customer_id: number): Promise<Vehicle[]> {
@@ -343,10 +356,12 @@ export const useDatabase = () => {
     return {
     getUsers,
     getServices,
+    getServicesByVehicleId,
     createService,
     updateService,
     deleteService,
     getVehicles,
+    getVehicleById,
     getVehiclesByCustomerId,
     createVehicle,
     updateVehicle,

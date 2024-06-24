@@ -101,7 +101,7 @@ const resetForm = (formEl: FormInstance | undefined) => {
     <el-form-item label="Model" prop="model">
       <el-input v-model="ruleForm.model" placeholder="Model" clearable></el-input>
     </el-form-item>
-    <el-form-item label="Şasi Numarası" prop="vin">
+    <el-form-item label="Şasi Numarası">
       <el-input v-model="ruleForm.vin" placeholder="Şasi Numarası" clearable></el-input>
     </el-form-item>
     <el-form-item label="Yıl" prop="year">

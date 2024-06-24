@@ -9,7 +9,7 @@ export const useBackend = () => {
             
             const userStore = useUser();
             userStore.username = user.username;
-            userStore.isLoggedIn = true;
+            userStore.isAuthenticated = true;
             return true;
         }
         return false;

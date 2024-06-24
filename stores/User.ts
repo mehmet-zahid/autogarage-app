@@ -1,7 +1,7 @@
 export const useUser = defineStore('user', {
     state: () => {
         return {
-            isLoggedIn: false,
+            isAuthenticated: false,
             username: null as string | null,
 
         };
@@ -12,9 +12,9 @@ export const useUser = defineStore('user', {
     },
     actions: {
         logout() {
-            this.isLoggedIn = false;
+            this.isAuthenticated = false;
             this.username = null;
-            console.log("isLoggedin", this.isLoggedIn)
+            console.log("isAutenticated", this.isAuthenticated)
 
             useRouter().push({ path: '/login' })
         }

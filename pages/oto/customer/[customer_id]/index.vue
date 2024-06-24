@@ -116,7 +116,7 @@ const breadcrumbLinks = ref([
         </div>
         <div v-else class="grid grid-cols-3 gap-4">
           <VehicleItemCard v-for="vehicle in filteredVehicles" :key="vehicle.id" :vehicle="vehicle"
-            @refresh-data="callGetVehicles" />
+            @refresh-data="callGetVehicles"/>
         </div>
       </UCard>
     </div>

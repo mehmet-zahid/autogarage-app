@@ -20,7 +20,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   const r = await login(event.data.name, event.data.password);
   if (r) {
     openMessage("Login successful, Redirecting to Dashboard", "success");
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    //await new Promise((resolve) => setTimeout(resolve, 2000));
     useRouter().push({ path: "/oto/dashboard" });
     return;
   }
