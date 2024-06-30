@@ -87,13 +87,13 @@ const getDropdownItems = (customer: Customer) => [
             <UCard class="flex flex-col flex-1"
               :ui="{ body: { base: 'flex-1' }, ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
               <template #header>
-                <Placeholder class="h-8" />
+                <div class="h-8" ></div>
               </template>
 
               <CustomerCreateForm @close-modal="isSlideOpen = false" @refresh-data="callGetCustomers" />
 
               <template #footer>
-                <Placeholder class="h-8" />
+                <div class="h-8" ></div>
               </template>
             </UCard>
           </USlideover>
@@ -109,12 +109,14 @@ const getDropdownItems = (customer: Customer) => [
       </template>
       
       <div class="grid grid-cols-3 gap-4">
+        <div class="text-gray-400 text-lg" v-if="customers.length < 1">Henüz Hiç Müşteri Yok</div>
 
         <div
-          class="p-2 relative h-32 rounded-lg shadow-md flex gap-2 items-center cursor-pointer border border-solid border-gray-800 transition-all hover:border-green-400"
+        v-else
+          class="customer-card p-2 relative h-32 rounded-lg shadow-md flex gap-2 items-center cursor-pointer border border-solid border-gray-800 transition-all hover:border-green-400"
           v-for="customer in filteredCustomers" :key="customer.id"
           @click="onSelect({ to: `/oto/customer/${customer.id}` })">
-          <div class="flex flex-col gap-2">
+          <div class="customer-info flex flex-col gap-2">
             <div class="font-semibold text-gray-400">{{ customer.name }}</div>
             <div v-if="customer.companyName" class="flex gap-2 justify-start">
               <Icon name="solar:buildings-2-bold" class="text-gray-500" size="20" />
@@ -122,9 +124,9 @@ const getDropdownItems = (customer: Customer) => [
             </div>
           </div>
 
-          <div class="flex flex-col gap-2">
-            <div class="text-sm text-gray-500">{{ customer.phone }}</div>
-            <div class="text-sm text-gray-500">{{ customer.email }}</div>
+          <div class="customer-info flex flex-col gap-2">
+            <el-tag type="info" >{{ customer.phone }}</el-tag>
+            <el-tag type="info">{{ customer.email }}</el-tag>
           </div>
 
           <UDropdown :items="getDropdownItems(customer)" :ui="{ item: { disabled: 'cursor-text select-text' } }"
@@ -143,8 +145,28 @@ const getDropdownItems = (customer: Customer) => [
   </div>
 </template>
 
-<style>
+<style scoped>
 .input-with-select .el-input-group__prepend {
   background-color: var(--el-fill-color-blank);
+}
+.customer-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  /* Ensure child elements do not overflow the parent */
+  overflow: hidden;
+}
+
+.customer-info, .vehicle-tags {
+  flex: 1;
+  min-width: 0; /* Prevents overflow */
+}
+
+@media (max-width: 768px) {
+  .customer-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 </style>

@@ -42,7 +42,7 @@ const ruleForm = reactive<RuleForm>({
 const rules = reactive<FormRules<RuleForm>>({
     make: [{ required: true, message: 'Marka adı gereklidir', trigger: 'blur' }],
     model: [{ required: true, message: 'Model adı gereklidir', trigger: 'blur' }],
-    vin: [{ required: true, message: 'Şasi numarası gereklidir', trigger: 'blur' }],
+    vin: [{ required: false, message: 'Şasi numarası gereklidir', trigger: 'blur' }],
     year: [{ required: true, message: 'Yıl bilgisi gereklidir', trigger: 'blur' }],
     color: [{ required: true, message: 'Renk bilgisi gereklidir', trigger: 'blur' }],
     plateNumber: [{ required: true, message: 'Plaka numarası gereklidir', trigger: 'blur' }],
@@ -101,7 +101,7 @@ const resetForm = (formEl: FormInstance | undefined) => {
     <el-form-item label="Model" prop="model">
       <el-input v-model="ruleForm.model" placeholder="Model" clearable></el-input>
     </el-form-item>
-    <el-form-item label="Şasi Numarası">
+    <el-form-item label="Şasi Numarası" prop="vin">
       <el-input v-model="ruleForm.vin" placeholder="Şasi Numarası" clearable></el-input>
     </el-form-item>
     <el-form-item label="Yıl" prop="year">

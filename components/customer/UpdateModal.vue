@@ -39,6 +39,9 @@ const ruleForm = reactive<RuleForm>({
 
 })
 
+// Store initial vehicle data to compare with later
+const initialCustomer = { ...props.customer }
+
 watch(
   () => props.customer,
   (newCustomer) => {
@@ -48,6 +51,7 @@ watch(
     ruleForm.address = newCustomer.address
     ruleForm.companyName = newCustomer.companyName
     ruleForm.description = newCustomer.description
+    Object.assign(initialCustomer, newCustomer) // Update initial data
   },
   { immediate: true, deep: true }
 )
@@ -86,7 +90,7 @@ const rules = reactive<FormRules<RuleForm>>({
   ],
   companyName: [
     {
-      required: true,
+      required: false,
       message: 'Please input company name',
       trigger: 'change',
     },
@@ -100,13 +104,20 @@ const rules = reactive<FormRules<RuleForm>>({
   ],
 })
 
-
+// Function to check if form data has changed
+const isFormChanged = () => {
+    return Object.keys(ruleForm).some(key => ruleForm[key] !== initialCustomer[key])
+}
 
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
+      if (!isFormChanged()) {
+                useShowToast("Verilerde herhangi bir değişiklik yok", "warning")
+                return
+            }
       loading.value = true;
       try {
         console.log("Rule Form", ruleForm)

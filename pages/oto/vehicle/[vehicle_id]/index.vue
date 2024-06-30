@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import type { Vehicle, Service } from '~/types/business';
+import type { Vehicle, Service, ServiceWithOperations } from '~/types/business';
+import { ServiceModalCard } from '#components'
+import { Back, Delete, SuccessFilled, ArrowRight, RefreshRight, Box } from '@element-plus/icons-vue';
 
-import { Back, Delete } from '@element-plus/icons-vue';
-
-const { getVehicleById, createService, getServicesByVehicleId, updateService } = useDatabase();
-
+const { getVehicleById, createService, updateService, getServicesWithOperationsByVehicleId } = useDatabase();
+const modal = useModal()
 
 const vehicle_id = parseInt(useRoute().params.vehicle_id);
 console.log(vehicle_id)
 const vehicle = ref(null as Vehicle | null);
-const { username } = useUser();
-const services = ref([] as Service[]);
-services.value = await getServicesByVehicleId(vehicle_id);
+vehicle.value = await getVehicleById(vehicle_id);
+console.log(toRaw(vehicle.value))
+const username = useLocalStorage('username', null);
+const services = ref([] as ServiceWithOperations[]);
+services.value = await getServicesWithOperationsByVehicleId(vehicle_id);
+console.log(toRaw(services.value))
 
+const filterText = useLocalStorage(`serviceFilterText_${vehicle_id}`, 'All');
 
 const createNewService = async () => {
     // creating with default values
@@ -20,33 +24,48 @@ const createNewService = async () => {
         vehicle_id: vehicle_id,
         total_cost: 0,
         note: '',
-        createdBy: username as string,
-        createdAt: new Date()
+        createdBy: username.value,
+        createdAt: new Date(),
     });
 
-    services.value.push(createdService);
+    services.value = await getServicesWithOperationsByVehicleId(vehicle_id);
+    console.log(toRaw(services.value))
     useShowToast('Yeni servis oluşturuldu.', 'success', 2000);
 }
 
-const updateServiceHandler = async (service: Service) => {
-    service.completedAt = new Date();
-    await updateService(service);
+const completeServiceHandler = async (service: ServiceWithOperations) => {
+    const updateData: Service = {
+        id: service.id,
+        vehicle_id: service.vehicle_id,
+        completedAt: new Date(),
+        total_cost: service.total_cost,
+        note: service.note,
+        createdBy: service.createdBy,
+        createdAt: service.createdAt,
+        isDeleted: 0
+    };
+    await updateService(updateData);
+    services.value = await getServicesWithOperationsByVehicleId(vehicle_id);
     useShowToast('Servis tamamlandı olarak işaretlendi.', 'success', 2000);
 
 }
 
-const deleteServiceHandler = async (service: Service) => {
-    service.isDeleted = 1;
-    await updateService(service);
+const deleteServiceHandler = async (service: ServiceWithOperations) => {
+    const updateData: Service = {
+        id: service.id,
+        vehicle_id: service.vehicle_id,
+        completedAt: service.completedAt,
+        total_cost: service.total_cost,
+        note: service.note,
+        createdBy: service.createdBy,
+        createdAt: service.createdAt,
+        isDeleted: 1
+    };
+    await updateService(updateData);
     useShowToast('Servis silindi.', 'success', 2000);
-    services.value = await getServicesByVehicleId(vehicle_id);
+    services.value = await getServicesWithOperationsByVehicleId(vehicle_id);
+    
 }
-
-onMounted(async () => {
-
-    vehicle.value = await getVehicleById(vehicle_id);
-    console.log(toRaw(vehicle.value))
-});
 
 function capitalize(word) {
     if (!word) return '';
@@ -57,7 +76,61 @@ function formatNumber(number) {
     return new Intl.NumberFormat('en-US').format(number);
 }
 
+function formatDateTime(date) {
+    if (!date) return '';
+    if (typeof date === 'string') {
+        date = new Date(date);
+    }
+    const pad = (num) => num.toString().padStart(2, '0');
 
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+const filteredServices = computed(() => {
+    const filterLower = filterText.value.trim().toLowerCase();
+
+    return services.value.filter(service => {
+        if (filterLower === 'completed') {
+            return service.completedAt != null;
+        } else if (filterLower === 'inprogress') {
+            return service.completedAt == null;
+        } else if (filterLower === 'all') {
+            return true;
+        }
+        return true; // To handle any unexpected filterText values
+    });
+});
+
+
+const filterOptions = [
+    {
+        label: 'Tamamlandı',
+        value: 'Completed',
+        icon: SuccessFilled,
+    },
+    {
+        label: 'İşlemde',
+        value: 'InProgress',
+        icon: RefreshRight,
+    },
+    {
+        label: 'Hepsi',
+        value: 'All',
+        icon: Box,
+    }];
+
+const openServiceModal = (service: ServiceWithOperations) => {
+    modal.open(ServiceModalCard, {
+        service_id: service.id,
+    })
+}
 </script>
 
 <template>
@@ -92,62 +165,82 @@ function formatNumber(number) {
                     </div>
                 </template>
 
-                <div class="h-96 flex flex-col gap-2">
+                <div class="h-full flex flex-col gap-2">
+                    <el-segmented v-model="filterText" :options="filterOptions">
+                        <template #default="{ item }">
+                            <div class="flex flex-col items-center gap-2 p-2">
+                                <el-icon size="20">
+                                    <component :is="item.icon" />
+                                </el-icon>
+                                <div>{{ item.label }}</div>
+                            </div>
+                        </template>
+                    </el-segmented>
+                    <div>
                     <el-scrollbar height="400px">
-                        <div v-for="(service, index) in services" :key="service.id"
-                            class="flex flex-col gap-2 relative">
+                        <transition-group name="fade" tag="div">
 
-                            <div
-                                class="m-3 mr-4 p-2 flex flex-col gap-2 items-center group rounded-lg border-b border-solid dark:border-neutral-700 dark:bg-neutral-800 px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/80 hover:shadow-green-400 shadow-sm">
-                                <span
-                                    class="text-2xl font-serif text-gray-400 group-hover:text-gray-300 absolute left-5 top-4">
-                                    {{ index + 1 }}
-                                </span>
-                                <el-tooltip effect="dark" placement="left-end" content="Servisi Sil"><el-button
-                                        @click="deleteServiceHandler(service)" class="absolute right-10 top-8"
-                                        type="danger" :icon="Delete" circle />
-                                </el-tooltip>
-                                <div class="m-1 flex gap-10">
+                            <div v-for="(service, index) in filteredServices" :key="service.id"
+                                class="flex flex-col gap-2 relative">
 
-                                    <div>
-                                        <el-button v-if="!service.completedAt" plain
-                                            @click="updateServiceHandler(service)">Tamamla</el-button>
-                                        <el-button type="primary" plain>Primary</el-button>
-                                        <el-button type="success" plain>Success</el-button>
-                                        <el-button type="info" plain>Info</el-button>
+                                <div
+                                    class="m-3 mr-4 p-2 flex flex-col gap-2 items-center group rounded-lg border-b border-solid dark:border-neutral-700 dark:bg-neutral-800 px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/80 hover:shadow-green-400 shadow-sm">
 
+                                    <!-- ABSOLUTE POSITION-->
+                                    <el-tag type="info" size="large"
+                                        class="text-2xl font-serif text-gray-400 group-hover:text-gray-300 absolute left-5 top-4">
+                                        {{ index + 1 }}
+                                    </el-tag>
+
+                                    <!-- ABSOLUTE POSITION-->
+                                    <div class="absolute right-7 top-1/2 transform -translate-y-1/2">
+                                        <el-tooltip class="cursor-pointer" effect="dark" placement="bottom"
+                                            content="Servis Detayı"><el-button :icon="ArrowRight" circle
+                                                @click="openServiceModal(service)" />
+                                        </el-tooltip>
                                     </div>
 
-
-                                </div>
-                                <div class="flex">
-                                    <div class="flex-none w-14 h-14">
-
-                                    </div>
-                                    <div class="grow h-14 flex flex-col gap-2 m-2">
-                                        <div class="flex gap-3">
-                                            <el-tag size="large" type="success">ServiceID: {{ service.id }}
-                                            </el-tag>
-                                            <el-tag size="large" type="info">Toplam Tutar: {{
-            formatNumber(service.total_cost) }}
-                                                TL</el-tag>
-                                        </div>
-                                        <div>
-                                            <el-tag size="large" :type="service.completedAt ? 'success' : 'info'">Durum: {{
-            service.completedAt
-                                                ? 'Tamamlandı' : 'Devam ediyor' }}</el-tag>
-                                        </div>
-
-                                    </div>
-                                    <div class="flex-none w-14 h-14 m-2">
-                                        <el-tag size="large" type="warning">Toplam Operasyon: 5
+                                    <div class="ml-2 flex gap-2 justify-center items-center">
+                                        <el-tag size="large" type="success">ServiceID: {{ service.id }}
                                         </el-tag>
+                                        <el-tag size="large" type="danger">Toplam Tutar: {{
+            formatNumber(service.total_cost) }}
+                                            TL</el-tag>
+                                        <el-tag size="large" :type="service.completedAt ? 'success' : 'info'">Durum:
+                                            {{
+            service.completedAt
+                ? 'Tamamlandı' : 'İşlemde' }}</el-tag>
+                                        <el-tag size="large" type="warning">Toplam Operasyon: {{
+            service.operations.length }}
+                                        </el-tag>
+                                        <div class="ml-3 flex gap-2  items-center justify-center">
+                                            <el-tooltip effect="dark" placement="top"
+                                                content="Servisi Tamamla"><el-button v-if="!service.completedAt"
+                                                    type="success" :icon="SuccessFilled" circle
+                                                    @click="completeServiceHandler(service)" />
+                                                <el-button v-else type="success" :icon="SuccessFilled" circle
+                                                    disabled />
+                                            </el-tooltip>
+                                            <el-tooltip effect="dark" placement="top" content="Servisi Sil"><el-button
+                                                    @click="deleteServiceHandler(service)" type="danger" :icon="Delete"
+                                                    circle />
+                                            </el-tooltip>
+                                        </div>
+
+                                        <el-text class="mx-1" type="info">{{ formatDateTime(service.createdAt) }}
+                                            oluşturuldu</el-text>
+
+
                                     </div>
+
                                 </div>
+
 
                             </div>
-                        </div>
+
+                        </transition-group>
                     </el-scrollbar>
+                </div>
                 </div>
 
             </UCard>

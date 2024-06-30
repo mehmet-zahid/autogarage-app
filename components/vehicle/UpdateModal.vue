@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import type { Vehicle } from '~/types/business'
 import type { ComponentSize, FormInstance, FormRules } from 'element-plus'
 
@@ -9,8 +8,7 @@ const props = defineProps<{
     vehicle: Vehicle
 }>()
 
-const loading = ref(false);
-
+const loading = ref(false)
 
 const emit = defineEmits(['refreshData'])
 
@@ -43,8 +41,10 @@ const ruleForm = reactive<RuleForm>({
     description: props.vehicle.description,
     plateNumber: props.vehicle.plateNumber,
     mileage: props.vehicle.mileage,
-
 })
+
+// Store initial vehicle data to compare with later
+const initialVehicle = { ...props.vehicle }
 
 watch(
     () => props.vehicle,
@@ -59,6 +59,7 @@ watch(
         ruleForm.description = newVehicle.description
         ruleForm.plateNumber = newVehicle.plateNumber
         ruleForm.mileage = newVehicle.mileage
+        Object.assign(initialVehicle, newVehicle) // Update initial data
     },
     { immediate: true, deep: true }
 )
@@ -66,22 +67,28 @@ watch(
 const rules = reactive<FormRules<RuleForm>>({
     make: [{ required: true, message: 'Marka bilgisi gereklidir', trigger: 'blur' }],
     model: [{ required: true, message: 'Model bilgisi gereklidir', trigger: 'blur' }],
-    vin: [{ required: true, message: 'Şasi numarası gereklidir', trigger: 'blur' }],
+    vin: [{ required: false, message: 'Şasi numarası gereklidir', trigger: 'blur' }],
     year: [{ required: true, message: 'Yıl bilgisi gereklidir', trigger: 'blur' }],
     color: [{ required: true, message: 'Renk bilgisi gereklidir', trigger: 'blur' }],
-    description: [{ required: true, message: 'Açıklama bilgisi gereklidir', trigger: 'blur' }],
+    description: [{ required: false, message: 'Açıklama bilgisi gereklidir', trigger: 'blur' }],
     plateNumber: [{ required: true, message: 'Plaka numarası gereklidir', trigger: 'blur' }],
     mileage: [{ required: true, message: 'Kilometre bilgisi gereklidir', trigger: 'blur' }],
 })
 
-
-
+// Function to check if form data has changed
+const isFormChanged = () => {
+    return Object.keys(ruleForm).some(key => ruleForm[key] !== initialVehicle[key])
+}
 
 const submitForm = async (formEl: FormInstance | undefined) => {
     if (!formEl) return
     await formEl.validate(async (valid, fields) => {
         if (valid) {
-            loading.value = true;
+            if (!isFormChanged()) {
+                useShowToast("Verilerde herhangi bir değişiklik yok", "warning")
+                return
+            }
+            loading.value = true
             try {
                 console.log("Rule Form", ruleForm)
                 const update_res = await updateVehicle(ruleForm)
@@ -89,13 +96,11 @@ const submitForm = async (formEl: FormInstance | undefined) => {
                 useShowToast('Araç Bilgileri Başarıyla Güncellendi.', 'success')
                 emit("refreshData")
                 modal.close()
-
             } catch (e) {
                 useShowToast("Araç bilgileri güncellenirken bir hata oluştu", "error")
                 console.log("Error", e)
             }
-            loading.value = false;
-
+            loading.value = false
         } else {
             console.log('error submit!', fields)
             useShowToast('Lütfen formu doğru doldurunuz', 'error')
@@ -108,7 +113,6 @@ const resetForm = (formEl: FormInstance | undefined) => {
     formEl.resetFields()
 }
 </script>
-
 
 <template>
     <UModal>

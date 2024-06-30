@@ -43,12 +43,18 @@ const getDropdownItems = (vehicle: Vehicle) => [
 </script>
 
 <template>
-    <div class="p-2 relative h-32 rounded-lg shadow-md flex gap-4 items-center cursor-pointer border 
+    <div class="vehicle-card p-2 relative h-32 rounded-lg shadow-md flex gap-4 items-center cursor-pointer border 
     border-solid border-gray-800 transition-all hover:border-green-400" @click="() => $router.push(`/oto/vehicle/${props.vehicle.id}`)">
-        <div class="flex flex-col gap-1">
-            <div class="text-lg font-semibold">{{ props.vehicle.make }} - {{ props.vehicle.model }}</div>
-            <div class="text-sm">{{ props.vehicle.plateNumber }}</div>
-            <div class="text-sm">{{ props.vehicle.year }}</div>
+        <div class="vehicle-info flex flex-col gap-1 text-gray-300">
+            <div class="font-bold ">{{ props.vehicle.make }} - {{ props.vehicle.model }}</div>
+            <div class="">{{ props.vehicle.plateNumber }}</div>
+            <div class="">{{ props.vehicle.year }}</div>
+        </div>
+
+        <div class="vehicle-tags flex flex-col gap-2">
+          <el-tag type="success">Kilometre: {{ props.vehicle.mileage }}</el-tag>
+          <el-tag type="success">Renk: {{ props.vehicle.color }}</el-tag>
+
         </div>
 
         <UDropdown :items="getDropdownItems(props.vehicle)" :ui="{ item: { disabled: 'cursor-text select-text' } }"
@@ -65,3 +71,26 @@ const getDropdownItems = (vehicle: Vehicle) => [
 
     </div>
 </template>
+
+<style scoped>
+.vehicle-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  /* Ensure child elements do not overflow the parent */
+  overflow: hidden;
+}
+
+.vehicle-info, .vehicle-tags {
+  flex: 1;
+  min-width: 0; /* Prevents overflow */
+}
+
+@media (max-width: 768px) {
+  .vehicle-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>
