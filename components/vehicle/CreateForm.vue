@@ -11,7 +11,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits(['closeModal', 'refreshData'])
 
-const { createVehicle } = useDatabase()
+const { createVehicle } = await useDatabase()
 
 interface RuleForm {
     make: string;

@@ -7,7 +7,7 @@ const props = defineProps < {
 } > ();
 
 const emit = defineEmits(['refreshData', 'click']);
-const { deleteVehicle } = useDatabase();
+const { deleteVehicle } = await useDatabase();
 const modal = useModal()
 
 const deleteVehicleHandler = async (id:number) => {

@@ -14,7 +14,7 @@ const loading = ref(false);
 
 const emit = defineEmits(['refreshData'])
 
-const { updateCustomer } = useDatabase()
+const { updateCustomer } = await useDatabase()
 
 interface RuleForm {
   id: number

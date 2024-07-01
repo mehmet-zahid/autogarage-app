@@ -1,10 +1,9 @@
-import Database from '@tauri-apps/plugin-sql';
+import { loadDatabase } from '~/database'
+
 import type { Customer, Vehicle, Technician, Service, UserLogin, License, ServiceOperation, ServiceType } from '~/types/business';
 
-
-
 export const useDatabase = async () => {
-  const db = await Database.load('sqlite:auto-repair-shop.db');
+  const db = await loadDatabase();
 
   const dbName = 'auto-repair-shop.db';
   const tables = {

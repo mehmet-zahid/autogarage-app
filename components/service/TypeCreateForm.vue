@@ -8,7 +8,7 @@ const username = useLocalStorage('username', '')
 
 const emit = defineEmits(['closeModal', 'refreshData'])
 
-const { createServiceType } = useDatabase()
+const { createServiceType } = await useDatabase()
 
 const formSize = ref<ComponentSize>('default')
 const ruleFormRef = ref<FormInstance>()

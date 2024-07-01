@@ -12,7 +12,7 @@ const username = useLocalStorage('username', '')
 
 const emit = defineEmits(['closeModal', 'refreshData'])
 
-const { createServiceOperation, getServiceTypes } = useDatabase()
+const { createServiceOperation, getServiceTypes } = await useDatabase()
 
 const serviceTypes = ref<ServiceType[]>([])
 

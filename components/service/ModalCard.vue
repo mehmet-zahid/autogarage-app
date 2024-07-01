@@ -2,7 +2,7 @@
 import type { ServiceOperationsWithTypes, ServiceOperation } from '~/types/business'
 
 const pending = ref(true)
-const { getServiceOpsWithServiceTypesByServiceId, deleteServiceOperations } = useDatabase()
+const { getServiceOpsWithServiceTypesByServiceId, deleteServiceOperations } = await useDatabase()
 
 const modal = useModal()
 const serviceOperations = ref<ServiceOperationsWithTypes[] | null>([])

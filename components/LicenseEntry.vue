@@ -3,7 +3,7 @@ import type { License } from "@/types/business"
 import { getExpirationDate, verifyToken } from "@/utils/jwt"
 
 const licenseToken = ref("")
-const { getLicense, updateLicense } = useDatabase()
+const { getLicense, updateLicense } = await useDatabase()
 
 const licenses = ref<License[]>([])
 const license = ref<License | null>(null)

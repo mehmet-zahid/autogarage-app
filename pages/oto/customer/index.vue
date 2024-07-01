@@ -5,7 +5,7 @@ import { Search } from '@element-plus/icons-vue'
 
 const router = useRouter();
 const isSlideOpen = ref(false)
-const { getCustomers, deleteCustomer } = useDatabase();
+const { getCustomers, deleteCustomer } = await useDatabase();
 const modal = useModal()
 const customers = ref<Customer[]>([])
 const searchQuery = ref('');

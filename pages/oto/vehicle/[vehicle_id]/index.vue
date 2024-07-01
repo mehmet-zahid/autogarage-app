@@ -3,7 +3,7 @@ import type { Vehicle, Service, ServiceWithOperations } from '~/types/business';
 import { ServiceModalCard } from '#components'
 import { Back, Delete, SuccessFilled, ArrowRight, RefreshRight, Box } from '@element-plus/icons-vue';
 
-const { getVehicleById, createService, updateService, getServicesWithOperationsByVehicleId } = useDatabase();
+const { getVehicleById, createService, updateService, getServicesWithOperationsByVehicleId } = await useDatabase();
 const modal = useModal()
 
 const vehicle_id = parseInt(useRoute().params.vehicle_id);

@@ -1,7 +1,8 @@
 import { generateToken, isTokenExpired } from '~/utils/jwt'
-const { getLicense, updateLicense, saveLicense } = useDatabase()
+
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
+    const { getLicense, updateLicense, saveLicense } = await useDatabase()
     const isAuthenticated = useLocalStorage("isAuthenticated", false)
 
     console.log(isAuthenticated)

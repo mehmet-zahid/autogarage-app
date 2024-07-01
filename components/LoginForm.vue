@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
-const { login } = useBackend();
+const { login } = await useBackend();
 
 const loading = ref(false);
 const schema = z.object({

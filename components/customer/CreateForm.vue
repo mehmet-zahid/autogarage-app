@@ -9,7 +9,7 @@ const loading = ref(false);
 
 const emit = defineEmits(['closeModal', 'refreshData'])
 
-const { createCustomer } = useDatabase()
+const { createCustomer } = await useDatabase()
 
 interface RuleForm {
   name: string

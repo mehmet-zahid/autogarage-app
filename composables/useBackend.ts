@@ -1,20 +1,16 @@
-const { getUsers } = useDatabase();
+
 const _username = useLocalStorage("username", "")
 const isAuthenticated = useLocalStorage("isAuthenticated", false)
 import { invoke } from "@tauri-apps/api/core";
 import { Window } from '@tauri-apps/api/window';
 
-export const useBackend = () => {
-
+export const useBackend = async () => {
+    const { getUsers } = await useDatabase();
     const login = async (username: string, password: string): Promise<boolean> => {
         const users = await getUsers();
         const user = users.find(user => user.username === username && user.password === password);
 
         if (user) {
-
-            const userStore = useUser();
-            userStore.username = user.username;
-            userStore.isAuthenticated = true;
             _username.value = user.username
             isAuthenticated.value = true
             return true;

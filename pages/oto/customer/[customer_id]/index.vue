@@ -2,7 +2,7 @@
 import type { Customer, Vehicle } from '~/types/business';
 import { Search } from '@element-plus/icons-vue'
 
-const { getCustomerById, getVehiclesByCustomerId } = useDatabase();
+const { getCustomerById, getVehiclesByCustomerId } = await useDatabase();
 const isSlideOpen = ref(false)
 const customer_id = parseInt(useRoute().params.customer_id)
 const customer = ref<Customer | null>(null);

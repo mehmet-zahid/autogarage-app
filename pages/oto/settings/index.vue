@@ -2,7 +2,7 @@
 import type { UserLogin } from "~/types/business"
 const username = useLocalStorage("username", "")
 const passwordVisibility = ref(false)
-const { getUserByName, updateUser } = useDatabase()
+const { getUserByName, updateUser } = await useDatabase()
 
 const user = ref<UserLogin | null>(null)
 const originalUser = ref<UserLogin | null>(null)

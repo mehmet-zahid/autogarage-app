@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "identifier": "mzi.autogarager.com",
   "build": {
-    "frontendDist": "../dist",
+    "frontendDist": "../.output/public",
     "devUrl": "http://localhost:3000",
     "beforeDevCommand": "bun dev",
     "beforeBuildCommand": "bun generate"

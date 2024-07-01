@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type {Technician } from '~/types/business'
 const emit = defineEmits(['closeModal', 'refreshData'])
-const { createTechnician} = useDatabase()
+const { createTechnician} = await useDatabase()
 // do not use same name with ref
 const form = reactive({
   fullName: '',
