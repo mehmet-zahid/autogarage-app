@@ -359,6 +359,21 @@ export const useDatabase = async () => {
     }
     return res.rowsAffected;
   }
+
+  async function deleteServiceTypes(serviceTypeIds: number[]): Promise<number> {
+    // Generate the parameter placeholders dynamically based on the number of IDs
+    const placeholders = serviceTypeIds.map((_, index) => `$${index + 1}`).join(', ');
+    const query = `DELETE FROM ${tables.service_types} WHERE id IN (${placeholders})`;
+    
+    const params = serviceTypeIds;
+  
+    const res = await db.execute(query, params);
+    if (res.rowsAffected === 0) {
+      throw new Error(`Could not delete Service Types with ids ${serviceTypeIds.join(', ')}`);
+    }
+    return res.rowsAffected;
+    
+  }
   // ----------------- Vehicle DB Functions -----------------
 
   // Get All Vehicles
@@ -639,6 +654,7 @@ export const useDatabase = async () => {
     createServiceType,
     updateServiceType,
     deleteServiceType,
+    deleteServiceTypes,
     getVehicles,
     getVehicleById,
     getVehiclesByCustomerId,

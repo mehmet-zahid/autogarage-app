@@ -107,7 +107,7 @@ const deleteOperationsHandler = async () => {
 }
 
 const DropdownItems = [
-   [{
+  [{
     label: 'Sil',
     icon: 'i-heroicons-trash-20-solid',
     shortcuts: ['⌘', 'D'],
@@ -135,11 +135,21 @@ const DropdownItems = [
                 <h1 class="text-md font-bold text-gray-400">Operasyon Sayısı:</h1>
                 <el-tag type="success">{{ serviceOperations?.length }}</el-tag>
               </div>
-            </div>
-            <div class="">
-              <UTooltip text="Yeni Operasyon" class="flex-4">
+              <el-divider direction="vertical" class="text-3xl"></el-divider>
+              <div class="ml-5" > 
+                <UTooltip text="Yeni Operasyon" class="flex-4">
                 <UButton icon="i-heroicons-plus-16-solid" @click="() => isSlideOpen = true" color="orange"
                   variant="outline" :ui="{ rounded: 'rounded-full' }" square />
+              </UTooltip>
+              </div>
+              
+            </div>
+            <div class="flex gap-2 justify-between">
+
+              
+              <UTooltip text="Kapat" class="flex-4" :shortcuts="['ESC']">
+                <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1"
+                  @click="modal.close" />
               </UTooltip>
             </div>
 
@@ -181,7 +191,7 @@ const DropdownItems = [
               <div class="h-8"></div>
             </template>
 
-            <ServiceOperationCreateForm :service_id="props.service_id" close-modal="isSlideOpen = false"
+            <ServiceOperationCreateForm :service_id="props.service_id" @close-modal="isSlideOpen = false"
               @refresh-data="refreshData" />
 
             <template #footer>

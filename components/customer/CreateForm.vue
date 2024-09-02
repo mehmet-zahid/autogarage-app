@@ -32,49 +32,56 @@ const ruleForm = reactive<RuleForm>({
 
 })
 
+const validateInput = (rule, value, callback) => {
+  if (/\s/.test(value)) {
+    callback(new Error('Name should not contain spaces'))
+  } else {
+    callback()
+  }
+}
+
 const rules = reactive<FormRules<RuleForm>>({
   name: [
-    { required: true, message: 'Please input Activity name', trigger: 'blur' },
-    { min: 5, max: 20, message: 'Length should be 5 to 20', trigger: 'blur' },
+    { required: true, message: 'İsim gerekli', trigger: 'blur' },
+    { min: 2, max: 20, message: 'Length should be 2 to 20', trigger: 'blur' },
   ],
   email: [
     {
       required: true,
-      message: 'Please input email address',
+      message: 'Email gerekli',
       trigger: 'change',
     },
     {
       type: 'email',
-      message: 'Please input correct email address',
+      message: 'Email i doğru giriniz',
       trigger: ['blur', 'change'],
-    },
+    }
   ],
   phone: [
     {
       required: true,
-      message: 'Please input phone number',
+      message: 'Tel no gerekli',
       trigger: 'change',
-    },
-
+    }
   ],
   address: [
     {
-      required: true,
+      required: false,
       message: 'Please input address',
       trigger: 'change',
     },
   ],
   companyName: [
     {
-      required: true,
-      message: 'Please input company name',
+      required: false,
+      message: 'Şirket adı giriniz',
       trigger: 'change',
     },
   ],
   description: [
     {
-      required: true,
-      message: 'Please input description',
+      required: false,
+      message: 'Açıklama giriniz',
       trigger: 'change',
     },
   ],

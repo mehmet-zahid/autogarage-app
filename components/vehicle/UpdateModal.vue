@@ -144,7 +144,7 @@ const resetForm = (formEl: FormInstance | undefined) => {
             </el-form-item>
             
             <el-form-item>
-                <el-button type="primary" @click="submitForm(ruleFormRef)">
+                <el-button type="primary" @click="submitForm(ruleFormRef)" :loading="loading">
                     Güncelle
                 </el-button>
                 <el-button @click="modal.close()">İptal et</el-button>

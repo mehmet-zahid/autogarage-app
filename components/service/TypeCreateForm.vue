@@ -81,7 +81,7 @@ const resetForm = (formEl: FormInstance | undefined) => {
         <el-form-item label="Açıklama" prop="description">
             <el-input v-model="ruleForm.description" placeholder="Açıklama"></el-input>
         </el-form-item>
-        <el-form-item label="Fiyat" prop="price">
+        <el-form-item label="Fiyat (TL)" prop="price">
             <el-input v-model="ruleForm.price" placeholder="Fiyat"></el-input>
         </el-form-item>
 

@@ -1,21 +1,24 @@
 
 const _username = useLocalStorage("username", "")
 const isAuthenticated = useLocalStorage("isAuthenticated", false)
+import { User } from "@element-plus/icons-vue";
 import { invoke } from "@tauri-apps/api/core";
 import { Window } from '@tauri-apps/api/window';
 
 export const useBackend = async () => {
-    const { getUsers } = await useDatabase();
+    const { getUsers, getUserByName } = await useDatabase();
     const login = async (username: string, password: string): Promise<boolean> => {
-        const users = await getUsers();
-        const user = users.find(user => user.username === username && user.password === password);
+        //const users = await getUsers();
+        //const user = users.find(user => user.username === username && user.password === password);
+        const user = await getUserByName(username);
+        console.log(user)
 
-        if (user) {
+        if (user && user.password === password) {
             _username.value = user.username
             isAuthenticated.value = true
             return true;
         }
-        return false;
+        throw new Error("Kullanıcı adı veya şifre hatalı!");
     };
 
     const logout = async () => {

@@ -37,7 +37,7 @@ const MIGRATION_VEHICLE_TABLE: Migration = Migration {
     description TEXT,
     mileage INTEGER,
     isDeleted INTEGER DEFAULT 0,
-    FOREIGN KEY (customer_id) REFERENCES Customer(id)
+    FOREIGN KEY (customer_id) REFERENCES Customer(id) ON DELETE CASCADE
   )",
     kind: MigrationKind::Up,
 };
@@ -54,7 +54,7 @@ const MIGRATION_SERVICE_TABLE: Migration = Migration {
       createdBy TEXT,
       completedAt TEXT,
       isDeleted INTEGER DEFAULT 0,
-      FOREIGN KEY (vehicle_id) REFERENCES Vehicle(id)
+      FOREIGN KEY (vehicle_id) REFERENCES Vehicle(id) ON DELETE CASCADE
     )",
     kind: MigrationKind::Up,
 };
@@ -101,8 +101,8 @@ const MIGRATION_SERVICE_OPERATION_TABLE: Migration = Migration {
     createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     createdBy TEXT,
     isDeleted INTEGER DEFAULT 0,
-    FOREIGN KEY (service_id) REFERENCES Service(id),
-    FOREIGN KEY (service_type_id) REFERENCES ServiceType(id)
+    FOREIGN KEY (service_id) REFERENCES Service(id) ON DELETE CASCADE,
+    FOREIGN KEY (service_type_id) REFERENCES ServiceType(id) ON DELETE CASCADE
   )",
     kind: MigrationKind::Up,
 };

@@ -75,7 +75,30 @@
             <template #title>Kullanıcı</template>
           </el-menu-item></NuxtLink
         >
+
+        <el-sub-menu index="5">
+          <template #title>
+            <el-icon><Checked /></el-icon>
+            <span>Servis Yönetimi</span>
+          </template>
+          <NuxtLink to="/oto/service">
+            <el-menu-item index="5-1">Servis Görüntüleme</el-menu-item>
+          </NuxtLink>
+          <NuxtLink to="/oto/service/optype">
+            <el-menu-item index="5-2">Servis Tipi</el-menu-item>
+          </NuxtLink>
+        </el-sub-menu>
+        
+
+        <el-menu-item index="6" class="mt-20" @click="logout">
+            <el-icon><SwitchButton /></el-icon>
+            <template #title>Çıkış Yap</template>
+          </el-menu-item>
+        
+        
       </el-menu>
+
+      
     </aside>
   </div>
 </template>
@@ -86,10 +109,14 @@ import {
   Menu as IconMenu,
   User,
   Avatar,
+  SwitchButton,
+  Checked
 } from "@element-plus/icons-vue";
 
 const isCollapsed = useLocalStorage("isCollapsed", false);
 const defaultActive = ref("2");
+
+const { logout } = await useBackend();
 
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath);

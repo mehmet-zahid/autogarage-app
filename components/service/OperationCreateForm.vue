@@ -42,7 +42,7 @@ const ruleForm = reactive<RuleForm>({
 
 const rules = reactive<FormRules<RuleForm>>({
     service_type_name: [
-        { required: true, message: 'Operasyon türü seçiniz', trigger: 'blur' },
+        { required: true, message: 'Operasyon türü seçiniz', trigger: 'change' },
     ],
     quantity: [
         { required: false, message: 'Miktar giriniz', trigger: 'blur' },
@@ -52,6 +52,17 @@ const rules = reactive<FormRules<RuleForm>>({
     ],
 })
 
+const foundServiceTypeId = (): number => {
+  const foundedId = serviceTypes.value.find(
+    (serviceType) => serviceType.name === ruleForm.service_type_name
+  )?.id;
+
+  if (foundedId === undefined) {
+    throw new Error('Service type not found');
+  }
+
+  return foundedId;
+};
 
 
 
@@ -61,14 +72,15 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         if (valid) {
             loading.value = true;
             try {
-
-                const create_res = await createServiceOperation({
+                const createData: ServiceOperation = {
                     service_id: props.service_id,
-                    service_type_id: serviceTypes.value.find((st) => st.name === ruleForm.service_type_name)?.id,
+                    service_type_id: foundServiceTypeId(),
                     quantity: ruleForm.quantity,
                     note: ruleForm.note,
                     createdBy: username.value
-                })
+                }
+
+                const create_res = await createServiceOperation(createData)
                 console.log("Create Response", create_res)
                 useShowToast('Operasyon oluşturma Başarılı', 'success')
                 emit("closeModal")
@@ -102,7 +114,7 @@ const resetForm = (formEl: FormInstance | undefined) => {
                 </el-tooltip>
         <el-form-item label="Servis Operasyon Türü" prop="service_type_name">
             <div class="flex gap-2 justify-center">
-                <el-select clearable v-model="ruleForm.service_type_name" placeholder="Operasyon türü seçiniz" size="large"
+                <el-select clearable filterable v-model="ruleForm.service_type_name" placeholder="Operasyon türü seçiniz" size="large"
       style="width: 240px">
                     <el-option v-for="item in serviceTypes" :key="item.id" :label="item.name" :value="item.name" />
                 </el-select>
@@ -110,7 +122,7 @@ const resetForm = (formEl: FormInstance | undefined) => {
 
                 <el-drawer v-model="dialog" title="Servis Operasyon Türü Oluştur" direction="ltr">
                     
-                        <ServiceTypeCreateForm :close-modal="()=>dialog=false" :refresh-data="callGetServiceTypes" />
+                        <ServiceTypeCreateForm @close-modal="()=>dialog=false" @refresh-data="callGetServiceTypes" />
                     
                 </el-drawer>
 
