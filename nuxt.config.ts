@@ -6,11 +6,7 @@ export default defineNuxtConfig({
     modules: [
       '@element-plus/nuxt',
       '@nuxt/ui',
-      '@vueuse/nuxt',
-      ["@pinia/nuxt", {
-        autoImports: ["defineStore", "acceptHMRUpdate"]
-      }],
-      '@pinia-plugin-persistedstate/nuxt'
+      '@vueuse/nuxt'
     ],
     colorMode: {
       preference: 'dark'

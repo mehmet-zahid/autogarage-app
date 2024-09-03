@@ -12,11 +12,10 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
-    "nuxt": "^3.11.2",
-    "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
+    "nuxt": "^3.12.2",
+    "vue": "^3.4.29",
+    "vue-router": "^4.3.3",
     "@element-plus/nuxt": "^1.0.9",
-    "@pinia-plugin-persistedstate/nuxt": "^1.2.0",
     "@vueuse/core": "^10.9.0",
     "@vueuse/nuxt": "^10.9.0",
     "element-plus": "2.7.2"
@@ -24,9 +23,10 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
     "@nuxt/ui": "^2.15.2",
-    "@pinia/nuxt": "^0.5.1",
-    "@tauri-apps/api": "^1.5.1",
+    "@tauri-apps/api": ">=2.0.0-beta.0",
+    "@tauri-apps/plugin-shell": ">=2.0.0-beta.0",
     "@tauri-apps/plugin-sql": "^2.0.0-beta.3",
+    "jose": "^5.4.1",
     "zod": "^3.22.4"
   }
 }

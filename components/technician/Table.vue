@@ -111,7 +111,7 @@ const { data: todos, pending } = await useLazyAsyncData<{
   >
     <template #header>
       <h2 class="font-semibold text-xl text-gray-900 dark:text-white leading-tight">
-        Müşteriler
+        Teknisyenler
       </h2>
     </template>
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
-const { login } = useBackend();
+const { login } = await useBackend();
 
 const loading = ref(false);
 const schema = z.object({
@@ -17,14 +17,18 @@ const state = ref({
 
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   loading.value = true;
-  const r = await login(event.data.name, event.data.password);
-  if (r) {
-    openMessage("Login successful, Redirecting to Dashboard", "success");
+  let msg_handler = null;
+  try {
+    const r = await login(event.data.name, event.data.password);
+    msg_handler = useShowToast("Giriş Başarılı, Yönlendiriliyorsunuz...", "success");
     await new Promise((resolve) => setTimeout(resolve, 2000));
     useRouter().push({ path: "/oto/dashboard" });
+    msg_handler.close();
     return;
+  } catch (e) {
+    console.error(e);
+    useShowToast(e.message, "error");
   }
-  openMessage("Login Failed, Check credentials", "error");
   loading.value = false;
 };
 

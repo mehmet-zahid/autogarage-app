@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "sqlite:auto-repair-shop.db",
+            "database": "C:\\Users\\mzi\\AppData\\Roaming\\com.tauri.dev\\auto-repair-shop.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}

@@ -1,123 +1,165 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri_plugin_shell::init as shell_init;
 use tauri_plugin_sql::{Migration, MigrationKind};
 
-const MIGRATION_CUSTOMERS_TABLE: Migration = Migration {
+const MIGRATION_CUSTOMER_TABLE: Migration = Migration {
     version: 1,
     description: "create_customers_table",
-    sql: "CREATE TABLE IF NOT EXISTS customers (
+    sql: "CREATE TABLE IF NOT EXISTS Customer (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      fullName TEXT NOT NULL,
+      name TEXT NOT NULL,
       registeredAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       companyName TEXT,
       email TEXT,
       phone TEXT,
       address TEXT,
-      vehicleIds TEXT,
-      serviceIds TEXT,
       description TEXT,
       isDeleted INTEGER DEFAULT 0
     )",
     kind: MigrationKind::Up,
 };
 
-const MIGRATION_SERVICES_TABLE: Migration = Migration {
+const MIGRATION_VEHICLE_TABLE: Migration = Migration {
     version: 2,
+    description: "create_vehicles_table",
+    sql: "CREATE TABLE IF NOT EXISTS Vehicle (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER,
+    registeredAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    make TEXT,
+    model TEXT,
+    vin TEXT,
+    year INTEGER,
+    plateNumber TEXT UNIQUE,
+    color TEXT,
+    description TEXT,
+    mileage INTEGER,
+    isDeleted INTEGER DEFAULT 0,
+    FOREIGN KEY (customer_id) REFERENCES Customer(id) ON DELETE CASCADE
+  )",
+    kind: MigrationKind::Up,
+};
+
+const MIGRATION_SERVICE_TABLE: Migration = Migration {
+    version: 3,
     description: "create_services_table",
-    sql: "CREATE TABLE IF NOT EXISTS services (
+    sql: "CREATE TABLE IF NOT EXISTS Service (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      customerId INTEGER,
-      technicianIds TEXT,
-      vehicleIds TEXT,
-      serviceOperationIds TEXT,
-      totalCost REAL,
+      vehicle_id INTEGER,
+      total_cost REAL,
       note TEXT,
       createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       createdBy TEXT,
-      isDeleted INTEGER DEFAULT 0
+      completedAt TEXT,
+      isDeleted INTEGER DEFAULT 0,
+      FOREIGN KEY (vehicle_id) REFERENCES Vehicle(id) ON DELETE CASCADE
     )",
     kind: MigrationKind::Up,
 };
 
-const MIGRATION_VEHICLES_TABLE: Migration = Migration {
-  version: 3,
-  description: "create_vehicles_table",
-  sql: "CREATE TABLE IF NOT EXISTS vehicles (
+const MIGRATION_TECHNICIAN_TABLE: Migration = Migration {
+    version: 4,
+    description: "create_technicians_table",
+    sql: "CREATE TABLE IF NOT EXISTS Technician (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    customerId INTEGER NOT NULL,
-    serviceIds TEXT,
-    technicianIds TEXT,
-    registeredAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    make TEXT,
-    model TEXT,
-    plateNumber TEXT,
-    year INTEGER,
-    color TEXT,
-    description TEXT,
-    mileage INTEGER,
-    isDeleted INTEGER DEFAULT 0
-  )",
-  kind: MigrationKind::Up,
-};
-
-const MIGRATION_TECHNICIANS_TABLE: Migration = Migration {
-  version: 4,
-  description: "create_technicians_table",
-  sql: "CREATE TABLE IF NOT EXISTS technicians (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fullName TEXT NOT NULL,
+    name TEXT NOT NULL,
     email TEXT,
     phone TEXT,
-    createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    specialty TEXT,
+    registeredAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     isDeleted INTEGER DEFAULT 0
   )",
-  kind: MigrationKind::Up,
+    kind: MigrationKind::Up,
 };
 
-const MIGRATION_SERVICE_TYPES_TABLE: Migration = Migration {
-  version: 5,
-  description: "create_service_types_table",
-  sql: "CREATE TABLE IF NOT EXISTS service_types (
+const MIGRATION_SERVICE_TYPE_TABLE: Migration = Migration {
+    version: 5,
+    description: "create_service_types_table",
+    sql: "CREATE TABLE IF NOT EXISTS ServiceType (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     description TEXT,
-    price REAL,
+    price REAL NOT NULL,
     createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     createdBy TEXT,
     isDeleted INTEGER DEFAULT 0
   )",
-  kind: MigrationKind::Up,
+    kind: MigrationKind::Up,
 };
 
-const MIGRATION_SERVICE_OPERATIONS_TABLE: Migration = Migration {
-  version: 6,
-  description: "create_service_operations_table",
-  sql: "CREATE TABLE IF NOT EXISTS service_operations (
+const MIGRATION_SERVICE_OPERATION_TABLE: Migration = Migration {
+    version: 6,
+    description: "create_service_operations_table",
+    sql: "CREATE TABLE IF NOT EXISTS ServiceOperation (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    serviceTypeId INTEGER NOT NULL,
-    name TEXT NOT NULL,
+    service_id INTEGER,
+    service_type_id INTEGER,
+    quantity INTEGER DEFAULT 1,
+    note TEXT,
     createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     createdBy TEXT,
-    isDeleted INTEGER DEFAULT 0
+    isDeleted INTEGER DEFAULT 0,
+    FOREIGN KEY (service_id) REFERENCES Service(id) ON DELETE CASCADE,
+    FOREIGN KEY (service_type_id) REFERENCES ServiceType(id) ON DELETE CASCADE
   )",
-  kind: MigrationKind::Up,
+    kind: MigrationKind::Up,
+};
+
+const MIGRATION_AUTH_USER_TABLE: Migration = Migration {
+    version: 7,
+    description: "create_auth_user_table",
+    sql: "CREATE TABLE IF NOT EXISTS AuthUser (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT,
+      password TEXT
+     )",
+    kind: MigrationKind::Up,
+};
+
+const MIGRATION_INSERT_DEFAULT_USERS: Migration = Migration {
+    version: 8,
+    description: "insert_default_users",
+    sql: "INSERT INTO AuthUser (username, password) VALUES ('admin', 'admin')",
+    kind: MigrationKind::Up,
+};
+
+const MIGRATION_LICENSE_TABLE: Migration = Migration {
+    version: 9,
+    description: "create_license_table",
+    sql: "CREATE TABLE IF NOT EXISTS License (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      token TEXT NOT NULL,
+      license_type TEXT NOT NULL DEFAULT 'Trial',
+      expiration TEXT,
+      isExpired INTEGER DEFAULT 0,
+      createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TEXT
+    )",
+    kind: MigrationKind::Up,
 };
 
 fn main() {
-  let migrations: Vec<Migration> = vec![
+    let migrations: Vec<Migration> = vec![
         // Define your migrations here
-        MIGRATION_CUSTOMERS_TABLE,
-        MIGRATION_SERVICES_TABLE,
-        MIGRATION_VEHICLES_TABLE,
-        MIGRATION_TECHNICIANS_TABLE,
-        MIGRATION_SERVICE_TYPES_TABLE,
-        MIGRATION_SERVICE_OPERATIONS_TABLE,
+        MIGRATION_CUSTOMER_TABLE,
+        MIGRATION_SERVICE_TABLE,
+        MIGRATION_VEHICLE_TABLE,
+        MIGRATION_TECHNICIAN_TABLE,
+        MIGRATION_SERVICE_TYPE_TABLE,
+        MIGRATION_SERVICE_OPERATION_TABLE,
+        MIGRATION_AUTH_USER_TABLE,
+        MIGRATION_INSERT_DEFAULT_USERS,
+        MIGRATION_LICENSE_TABLE,
     ];
-  tauri::Builder::default()
-    .plugin(tauri_plugin_sql::Builder::default()
-    .add_migrations("sqlite:auto-repair-shop.db", migrations)
-    .build())
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    tauri::Builder::default()
+        .plugin(
+            tauri_plugin_sql::Builder::default()
+                .add_migrations("sqlite:auto-repair-shop.db", migrations)
+                .build(),
+        )
+        .plugin(shell_init())
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }

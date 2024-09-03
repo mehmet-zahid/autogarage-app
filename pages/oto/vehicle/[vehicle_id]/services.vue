@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-const { getAllServices } = useDatabase();
+const { getAllServices } = await useDatabase();
 
 // fetch initial data
 const services = ref([]);

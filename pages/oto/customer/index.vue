@@ -1,89 +1,39 @@
 <script setup lang="ts">
-import type { Customer} from '~/types/business'
+import type { Customer } from '~/types/business'
+import { CustomerUpdateModal } from '#components'
+import { Search } from '@element-plus/icons-vue'
+
 const router = useRouter();
-const isModalOpen = ref(false)
-const { getAllCustomers } = useDatabase();
-
-const customersData = ref([])
-customersData.value = await getAllCustomers();
-
-console.log(await getAllCustomers());
-
-const commandPaletteRef = ref();
-
-const customers = computed(() =>
-customersData.value.map((customer: Customer) => ({
-    id: customer.id.toString(),
-    label: customer.fullName,
-    to: `/oto/customer/${customer.id}`,
-    //href: `/oto/customer/${customer.id}`,
-    icon: "i-heroicons-user",
-  }))
-);
-
-console.log(customers);
-
-
-const refreshData = async () => {
-  customersData.value = await getAllCustomers();
+const isSlideOpen = ref(false)
+const { getCustomers, deleteCustomer } = await useDatabase();
+const modal = useModal()
+const customers = ref<Customer[]>([])
+const searchQuery = ref('');
+const callGetCustomers = async () => {
+  console.log("Call get customers")
+  customers.value = await getCustomers()
+  console.log(toRaw(customers.value))
 }
-const actions = [
-  // {
-  //   id: "new-customer",
-  //   label: "Yeni Müşteri Ekle",
-  //   icon: "i-heroicons-document-plus",
-  //   click: () => toast.add({
-  //     title: "Success",
-  //     icon: "i-heroicons-check-circle",
-  //     description: "Müşteri Kaydedildi",
-  //     status: "success",
-  //     duration: 3000,
-  //     isClosable: true,
-  //     position: "top-right",
-  //   }),
-  //   shortcuts: ["⌘", "N"],
-  // },
-  // {
-  //   id: "new-folder",
-  //   label: "Add new folder",
-  //   icon: "i-heroicons-folder-plus",
-  //   click: () => toast.add({ title: "New folder added!" }),
-  //   shortcuts: ["⌘", "F"],
-  // },
-  // {
-  //   id: "hashtag",
-  //   label: "Add hashtag",
-  //   icon: "i-heroicons-hashtag",
-  //   click: () => toast.add({ title: "Hashtag added!" }),
-  //   shortcuts: ["⌘", "H"],
-  // },
-  // {
-  //   id: "label",
-  //   label: "Add label",
-  //   icon: "i-heroicons-tag",
-  //   click: () => toast.add({ title: "Label added!" }),
-  //   shortcuts: ["⌘", "L"],
-  // },
-];
 
-const groups = computed(() =>
-  [
-    commandPaletteRef.value?.query
-      ? {
-          key: "customers",
-          commands: customers.value,
-        }
-      : {
-          key: "recent",
-          label: "Recent searches",
-          commands: customers.value.slice(0, 5),
-        },
-    {
-      key: "actions",
-      commands: actions,
-    },
-  ].filter(Boolean)
-);
+const filteredCustomers = computed(() => {
+  if (!searchQuery.value) {
+    return customers.value;
+  }
+  return customers.value.filter((customer: Customer) =>
+    customer.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    customer.companyName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    customer.phone.includes(searchQuery.value) ||
+    customer.email.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+onMounted(async () => {
+  await callGetCustomers()
+
+  //console.log(toRaw(customers.value))
+});
+
+
 
 function onSelect(option) {
   if (option.click) {
@@ -94,6 +44,35 @@ function onSelect(option) {
     window.open(option.href, "_blank");
   }
 }
+const deleteCustomerHandler = async (id) => {
+  await deleteCustomer(id)
+  useShowToast("Müşteri başarıyla silindi", "success")
+  await callGetCustomers()
+}
+
+const openUpdateModal = (customer: Customer) => {
+  console.log("Modal open function", customer)
+  modal.open(CustomerUpdateModal, {
+    customer: customer,
+    onRefreshData: callGetCustomers
+  })
+}
+
+const getDropdownItems = (customer: Customer) => [
+  [{
+    label: 'Güncelle',
+    slot: 'update',
+    icon: 'i-heroicons-pencil',
+    disabled: false,
+    click: () => openUpdateModal(customer)
+  }], [{
+    label: 'Sil',
+    slot: 'delete',
+    icon: 'i-heroicons-trash',
+    disabled: false,
+    click: async () => await deleteCustomerHandler(customer.id)
+  }]
+];
 </script>
 
 <template>
@@ -101,50 +80,93 @@ function onSelect(option) {
     <UCard>
       <template #header>
         <div class="flex gap-3">
-          <h1 class="text-lg font-semibold">Müşteriler</h1>
-          <UButton
-            icon="i-heroicons-plus"
-            @click="isModalOpen = true"
-          >
+          <UButton icon="i-heroicons-plus" @click="isSlideOpen = true">
             Yeni Müşteri Ekle
           </UButton>
-          <div class="p-4">
-          <UModal v-model="isModalOpen">
-            <UCard
-              :ui="{
-                
-                padding: 'p-8',
-              }"
-            >
+          <USlideover v-model="isSlideOpen">
+            <UCard class="flex flex-col flex-1"
+              :ui="{ body: { base: 'flex-1' }, ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
               <template #header>
-                <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
-              Yeni Müşteri Kayıt
-            </h3>
-            <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1" @click="isModalOpen = false" />
-          </div>
+                <div class="h-8" ></div>
               </template>
 
-              <CustomerCreateForm @close-modal="isModalOpen = false" @refresh-data="refreshData" />
+              <CustomerCreateForm @close-modal="isSlideOpen = false" @refresh-data="callGetCustomers" />
 
               <template #footer>
-                <Placeholder class="h-8" />
+                <div class="h-8" ></div>
               </template>
             </UCard>
-          </UModal>
+          </USlideover>
         </div>
+        <div class="mt-4 flex gap-4">
+          <el-input v-model="searchQuery" style="max-width: 600px" placeholder="Müşteri Ara..."
+            class="input-with-select">
+            <template #append>
+              <el-button :icon="Search" />
+            </template>
+          </el-input>
         </div>
       </template>
-      <UCommandPalette
-        ref="commandPaletteRef"
-        placeholder="Müşteri ara"
-        :groups="groups"
-        :autoselect="false"
-        @update:model-value="onSelect"
-      />
-      <template #footer> </template>
-    </UCard>
+      
+      <div class="grid grid-cols-3 gap-4">
+        <div class="text-gray-400 text-lg" v-if="customers.length < 1">Henüz Hiç Müşteri Yok</div>
 
-    <CustomerTable />
+        <div
+        v-else
+          class="customer-card p-2 relative h-32 rounded-lg shadow-md flex gap-2 items-center cursor-pointer border border-solid border-gray-800 transition-all hover:border-green-400"
+          v-for="customer in filteredCustomers" :key="customer.id"
+          @click="onSelect({ to: `/oto/customer/${customer.id}` })">
+          <div class="customer-info flex flex-col gap-2">
+            <div class="font-semibold text-gray-400">{{ customer.name }}</div>
+            <div v-if="customer.companyName" class="flex gap-2 justify-start">
+              <Icon name="solar:buildings-2-bold" class="text-gray-500" size="20" />
+              <UBadge color="primary" variant="outline">{{ customer.companyName }}</UBadge>
+            </div>
+          </div>
+
+          <div class="customer-info flex flex-col gap-2">
+            <el-tag type="info" >{{ customer.phone }}</el-tag>
+            <el-tag type="info">{{ customer.email }}</el-tag>
+          </div>
+
+          <UDropdown :items="getDropdownItems(customer)" :ui="{ item: { disabled: 'cursor-text select-text' } }"
+            class="absolute right-1 top-1" @click.stop>
+            <Icon name="heroicons-outline:dots-horizontal" class="text-green-500" size="24" />
+
+            <template #item="{ item }">
+              <span class="truncate">{{ item.label }}</span>
+              <UIcon :name="item.icon" class="flex-shrink-0 h-4 w-4 text-gray-400 dark:text-gray-500 ms-auto" />
+            </template>
+          </UDropdown>
+        </div>
+
+      </div>
+    </UCard>
   </div>
 </template>
+
+<style scoped>
+.input-with-select .el-input-group__prepend {
+  background-color: var(--el-fill-color-blank);
+}
+.customer-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  /* Ensure child elements do not overflow the parent */
+  overflow: hidden;
+}
+
+.customer-info, .vehicle-tags {
+  flex: 1;
+  min-width: 0; /* Prevents overflow */
+}
+
+@media (max-width: 768px) {
+  .customer-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>

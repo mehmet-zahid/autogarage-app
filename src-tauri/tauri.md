@@ -1,44 +1,41 @@
-    tauri::Builder::default()
-        // .menu(menu)
-        .plugin(
-            tauri_plugin_sql::Builder::default()
-                .add_migrations(
-                    "sqlite:inventory_system.db",
-                    vec![
-                        Migration {
-                            version: 1,
-                            description: "create users",
-                            sql: include_str!("../migrations/1.sql"),
-                            kind: MigrationKind::Up,
-                        },
-                        Migration {
-                            version: 2,
-                            description: "create inventory & inventory history ",
-                            sql: include_str!("../migrations/2.sql"),
-                            kind: MigrationKind::Up,
-                        },
-                        Migration {
-                            version: 3,
-                            description: "create transactions & transaction details",
-                            sql: include_str!("../migrations/3.sql"),
-                            kind: MigrationKind::Up,
-                        },
-                        Migration {
-                            version: 4,
-                            description: "added VAT on transaction columns",
-                            sql: include_str!("../migrations/4.sql"),
-                            kind: MigrationKind::Up,
-                        },
-                        Migration {
-                            version: 5,
-                            description: "added location on inventory table",
-                            sql: include_str!("../migrations/5.sql"),
-                            kind: MigrationKind::Up,
-                        },
-                    ],
-                )
-                .build(),
-        )
-        .invoke_handler(tauri::generate_handler![export_xls])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+# add this to tauri.conf.json for macos build
+`
+"macOS": {
+        "category": "public.app-category.developer-tools",
+        "entitlements": "entitlements.mac.inherit.plist",
+        "entitlementsInherit": "entitlements.mac.inherit.plist",
+        "exceptionDomain": "",
+        "hardenedRuntime": true,
+        "provisioningProfile": "",
+        "signingIdentity": "Developer ID Application: Your Name (TeamID)"
+      }
+`
+# TO DO (* -> not immidate, ** -> immidiate, *** -> very immidate)
+
+## Reporting (Pdf, Excel) 
+**printpdf = "0.7.0" at cargo side (rust crate)
+  [x] Pdf Report Generation (*)
+  [x] Excel Report Generation (*)
+  [x] Report Filters (*)
+  [x] Report Export (*)
+
+## User Management (The only user is the admin, the admin can add new users, and the new users can only view the reports and not add new users.)
+  [x] Adding New Users (***)
+  [x] Removing Users (***)
+  [x] User Roles (*)
+
+## Audit Log Collection
+  [x] User Login Logs (*)
+  [x] User Logout Logs (*)
+  [x] User Action Logs(*)
+
+## License Management Improvement
+  [x] License Expiry Notification (*)
+  [x] License Renewal (*)
+  [x] License Deactivation (*)
+
+## Dashboard
+  [x] Dashboard (*)
+    - Which data to show on the dashboard
+  [x] Dashboard Filters (*)
+  [x] Dashboard Graphs (*)

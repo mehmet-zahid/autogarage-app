@@ -3,15 +3,21 @@
 import type { Customer } from '~/types/business'
 import type { ComponentSize, FormInstance, FormRules } from 'element-plus'
 
+const modal = useModal()
+
+const props = defineProps<{
+  customer: Customer
+}>()
 
 const loading = ref(false);
 
 
-const emit = defineEmits(['closeModal', 'refreshData'])
+const emit = defineEmits(['refreshData'])
 
-const { createCustomer } = await useDatabase()
+const { updateCustomer } = await useDatabase()
 
 interface RuleForm {
+  id: number
   name: string
   email: string
   phone: string
@@ -23,50 +29,61 @@ interface RuleForm {
 const formSize = ref<ComponentSize>('default')
 const ruleFormRef = ref<FormInstance>()
 const ruleForm = reactive<RuleForm>({
-  name: '',
-  email: '',
-  phone: '',
-  address: '',
-  companyName: '',
-  description: ''
+    id: props.customer.id,
+    name: props.customer.name,
+    email: props.customer.email,
+    phone: props.customer.phone,
+    address: props.customer.address,
+    companyName: props.customer.companyName,
+    description: props.customer.description
 
 })
 
-const validateInput = (rule, value, callback) => {
-  if (/\s/.test(value)) {
-    callback(new Error('Name should not contain spaces'))
-  } else {
-    callback()
-  }
-}
+// Store initial vehicle data to compare with later
+const initialCustomer = { ...props.customer }
+
+watch(
+  () => props.customer,
+  (newCustomer) => {
+    ruleForm.name = newCustomer.name
+    ruleForm.email = newCustomer.email
+    ruleForm.phone = newCustomer.phone
+    ruleForm.address = newCustomer.address
+    ruleForm.companyName = newCustomer.companyName
+    ruleForm.description = newCustomer.description
+    Object.assign(initialCustomer, newCustomer) // Update initial data
+  },
+  { immediate: true, deep: true }
+)
 
 const rules = reactive<FormRules<RuleForm>>({
   name: [
-    { required: true, message: 'İsim gerekli', trigger: 'blur' },
-    { min: 2, max: 20, message: 'Length should be 2 to 20', trigger: 'blur' },
+    { required: true, message: 'Please input Activity name', trigger: 'blur' },
+    { min: 5, max: 20, message: 'Length should be 5 to 20', trigger: 'blur' },
   ],
   email: [
     {
       required: true,
-      message: 'Email gerekli',
+      message: 'Please input email address',
       trigger: 'change',
     },
     {
       type: 'email',
-      message: 'Email i doğru giriniz',
+      message: 'Please input correct email address',
       trigger: ['blur', 'change'],
-    }
+    },
   ],
   phone: [
     {
       required: true,
-      message: 'Tel no gerekli',
+      message: 'Please input phone number',
       trigger: 'change',
-    }
+    },
+
   ],
   address: [
     {
-      required: false,
+      required: true,
       message: 'Please input address',
       trigger: 'change',
     },
@@ -74,37 +91,44 @@ const rules = reactive<FormRules<RuleForm>>({
   companyName: [
     {
       required: false,
-      message: 'Şirket adı giriniz',
+      message: 'Please input company name',
       trigger: 'change',
     },
   ],
   description: [
     {
-      required: false,
-      message: 'Açıklama giriniz',
+      required: true,
+      message: 'Please input description',
       trigger: 'change',
     },
   ],
 })
 
-
+// Function to check if form data has changed
+const isFormChanged = () => {
+    return Object.keys(ruleForm).some(key => ruleForm[key] !== initialCustomer[key])
+}
 
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
+      if (!isFormChanged()) {
+                useShowToast("Verilerde herhangi bir değişiklik yok", "warning")
+                return
+            }
       loading.value = true;
       try {
-
-        const create_res = await createCustomer(ruleForm)
-        console.log("Create Response", create_res)
-        useShowToast('Müşteri başarıyla eklendi', 'success')
-        emit("closeModal")
+        console.log("Rule Form", ruleForm)
+        const update_res = await updateCustomer(ruleForm)
+        console.log("Update Response", update_res)
+        useShowToast('Müşteri Bilgileri Başarıyla Güncellendi.', 'success')
         emit("refreshData")
+        modal.close()
 
       } catch (e) {
-        useShowToast("Müşteri eklenirken bir hata oluştu", "error")
+        useShowToast("Müşteri güncellenirken bir hata oluştu", "error")
         console.log("Error", e)
       }
       loading.value = false;
@@ -138,8 +162,9 @@ function parsePhoneNumber(value: string) {
 
 
 <template>
+  <UModal>
   <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules" label-width="auto" style="max-width: 600px"
-    :size="formSize" status-icon>
+    :size="formSize" status-icon class="p-3">
     <el-form-item label="Müşteri Adı" prop="name">
       <el-input v-model="ruleForm.name" clearable />
     </el-form-item>
@@ -148,7 +173,7 @@ function parsePhoneNumber(value: string) {
       <el-input v-model="ruleForm.email" type="email" clearable />
     </el-form-item>
 
-    <el-form-item label="Müşteri Şirket">
+    <el-form-item label="Müşteri Şirket" prop="companyName">
       <el-input v-model="ruleForm.companyName" clearable />
     </el-form-item>
 
@@ -163,12 +188,11 @@ function parsePhoneNumber(value: string) {
       <el-input v-model="ruleForm.description" type="textarea" clearable />
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" @click="submitForm(ruleFormRef)">
-        Create
+      <el-button type="primary" @click="submitForm(ruleFormRef)" :loading="loading">
+        Güncelle
       </el-button>
-      <el-button @click="resetForm(ruleFormRef)">Reset</el-button>
-      <el-button @click="$emit('closeModal')">İptal et</el-button>
+      <el-button @click="modal.close()">İptal et</el-button>
     </el-form-item>
   </el-form>
-
+</UModal>
 </template>

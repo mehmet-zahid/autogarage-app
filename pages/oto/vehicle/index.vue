@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
+
 
 </script>
 
 <template>
-    <div>
-        Vehicle Page
-    </div>
+  <div class="m-3 flex flex-col gap-10">
+  Vehicles
+  </div>
 </template>
-
